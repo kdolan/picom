@@ -2,10 +2,10 @@
   "name": "effective-winner-mumble",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "bin/scream-demo.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node bin/scream-demo.js"
   },
   "repository": {
     "type": "git",
@@ -18,9 +18,24 @@
   },
   "homepage": "https://github.com/kdolan/effective-winner-mumble#readme",
   "dependencies": {
+    "body-parser": "^1.19.0",
+    "config": "^3.2.6",
     "delay-stream": "0.0.3",
     "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "helmet": "^3.21.2",
+    "loglevel": "^1.6.7",
+    "morgan": "^1.9.1",
     "mumble": "^0.3.21",
+    "nunjucks": "^3.2.0",
+    "path": "^0.12.7",
     "wavefile": "^11.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "cross-env": "^7.0.0",
+    "mocha": "^7.0.1",
+    "supertest": "^4.0.2"
   }
 }

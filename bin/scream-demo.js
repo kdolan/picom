@@ -4,11 +4,11 @@ const delay = require('delay-stream');
 const mumble = require('mumble'),
     fs = require('fs');
 
-const screamSteam = fs.createReadStream('./sounds/falling.wav');
+const screamSteam = fs.createReadStream('../sounds/falling.wav');
 
 const options = {
-    key: fs.readFileSync( 'cert/key.pem' ),
-    cert: fs.readFileSync( 'cert/cert.pem' ),
+    key: fs.readFileSync( '../cert/key.pem' ),
+    cert: fs.readFileSync( '../cert/cert.pem' ),
     port: 36001
 };
 
@@ -19,7 +19,7 @@ mumble.connect( process.env.MUMBLE_SERVER, options, function ( error, connection
 
     console.log( 'Connected' );
 
-    connection.authenticate( 'GhostUser' );
+    connection.authenticate( 'GhostUser', null );
     connection.on( 'initialized', onInit );
     connection.on( 'voice', onVoice );
     connection.on( `message`, onMessage);

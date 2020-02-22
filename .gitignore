@@ -1,5 +1,7 @@
 # Cert
 cert/
+# Local Config Files
+*local.js
 
 # Logs
 logs
