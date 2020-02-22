@@ -1,4 +1,5 @@
 require('dotenv').config();
+const delay = require('delay-stream');
 
 const mumble = require('mumble'),
     fs = require('fs');
@@ -39,33 +40,11 @@ var onInit = function() {
         sampleRate: 48000
     });
     setTimeout(() => screamSteam.pipe(stream), 10000);
-
+    setTimeout(() => globalCon.outputStream().pipe(delay(3000)).pipe(globalCon.inputStream() ), 15000);
 };
 
 var onVoice = function( voice ) {
     console.log( 'Mixed voice' );
 
     var pcmData = voice;
-};
-///
-var freq = (1*process.env.FREQ) || 200;
-var stream;
-
-var phase = 0;
-var generateSound = function() {
-    var b = new Buffer(480*2);
-    for( var i = 0; i < 480; i++ ) {
-        var sample = Math.round( Math.sin( Math.PI*2*(phase+i)*freq/48000 ) * (1<<12) );
-        b.writeInt16LE( sample, i*2 );
-    }
-    phase += 480;
-    return b;
-};
-
-var writeSound = function() {
-    // Fill the buffer
-    while( stream.write( generateSound() ) ) {}
-
-    // Wait for the buffer to drain
-    stream.once( 'drain', writeSound );
 };

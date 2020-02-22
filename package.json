@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/kdolan/effective-winner-mumble#readme",
   "dependencies": {
+    "delay-stream": "0.0.3",
     "dotenv": "^8.2.0",
     "mumble": "^0.3.21",
     "wavefile": "^11.0.0"
