@@ -6,7 +6,7 @@ const mumble = require('mumble'),
 
 const screamSteam = fs.createReadStream('./sounds/falling.wav');
 
-var options = {
+const options = {
     key: fs.readFileSync( 'cert/key.pem' ),
     cert: fs.readFileSync( 'cert/cert.pem' ),
     port: 36001
@@ -22,12 +22,13 @@ mumble.connect( process.env.MUMBLE_SERVER, options, function ( error, connection
     connection.authenticate( 'GhostUser' );
     connection.on( 'initialized', onInit );
     connection.on( 'voice', onVoice );
+    connection.on( `message`, onMessage);
 
     const channel = connection.channelByName("AFK");
     globalCon = connection;
 });
 
-var onInit = function() {
+function onInit() {
     // Connection is authenticated and usable.
     console.log( 'Connection initialized' );
     const AFK = globalCon.channelByName("Landing Channel");
@@ -39,12 +40,16 @@ var onInit = function() {
         bitDepth: 16,
         sampleRate: 48000
     });
-    setTimeout(() => screamSteam.pipe(stream), 10000);
-    setTimeout(() => globalCon.outputStream().pipe(delay(3000)).pipe(globalCon.inputStream() ), 15000);
-};
+    //setTimeout(() => screamSteam.pipe(stream), 10000);
+    //Loopback
+    //setTimeout(() => globalCon.outputStream().pipe(delay(3000)).pipe(globalCon.inputStream() ), 15000);
+}
 
-var onVoice = function( voice ) {
+function onVoice( voice ) {
     console.log( 'Mixed voice' );
-
     var pcmData = voice;
-};
+}
+
+function onMessage(message, user, scope){
+    console.log(`New Message from ${user.name} in ${scope}: ${message}`);
+}
