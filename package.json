@@ -1,0 +1,24 @@
+{
+  "name": "effective-winner-mumble",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kdolan/effective-winner-mumble.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kdolan/effective-winner-mumble/issues"
+  },
+  "homepage": "https://github.com/kdolan/effective-winner-mumble#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "mumble": "^0.3.21",
+    "wavefile": "^11.0.0"
+  }
+}
