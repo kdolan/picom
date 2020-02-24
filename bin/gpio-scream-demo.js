@@ -36,6 +36,7 @@ function writeLoop({stream}) {
     };
 
     if(holding) {
+        log.info('Writing Tone...');
         writeTone({stream, phase});
         phase += 480;
     }
@@ -70,7 +71,6 @@ function main() {
                    log.info('Button Pressed');
                }
                else {
-                   phase = 0;
                    holding = false;
                    log.info('Button Released');
                }
