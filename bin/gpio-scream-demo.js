@@ -12,7 +12,7 @@ const screamSteam = fs.createReadStream('./sounds/falling.wav');
 const CONFIG = require('../config/mumble/local');
 
 const FREQ_INPUT = (1*process.env.FREQ) || 200;
-const FREQ = FREQ_INPUT / 4;
+const FREQ = FREQ_INPUT / 8;
 const PHASE_SHIFT = 120;
 
 function generateSound(phase=0) {
