@@ -31,8 +31,13 @@ function main() {
            else
                log.warn(`WARNING - No mocked glitchFilter`);
 
+           let playing = false;
            button.on('alert', (level, tick) => {
-               client.playReadableStream(screamSteam);
+               if(!playing) {
+                   playing = true;
+                   client.playReadableStream(screamSteam);
+                   setTimeout(() => playing = false, 5000);
+               }
            });
        })
        .catch(err => {
