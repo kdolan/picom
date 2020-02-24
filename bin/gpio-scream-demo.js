@@ -4,6 +4,8 @@ const fs = require('fs');
 const MumbleClientService = require('../service/MumbleClientService').MumbleClientService;
 const Gpio = require('../service/Gpio').Gpio;
 const log = require('loglevel');
+if(process.env.NODE_ENV !== "production")
+    log.setDefaultLevel("debug");
 
 const screamSteam = fs.createReadStream('./sounds/falling.wav');
 
