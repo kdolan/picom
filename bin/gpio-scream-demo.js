@@ -13,17 +13,18 @@ const CONFIG = require('../config/mumble/local');
 
 const FREQ = (1*process.env.FREQ) || 200;
 const PHASE_SHIFT = 480;
+const BUFFER_SIZE = 24;
 
 function generateSound(phase=0) {
-    let b = new Buffer(PHASE_SHIFT*2);
-    for( let i = 0; i < PHASE_SHIFT; i++ ) {
+    let b = new Buffer(BUFFER_SIZE*2);
+    for( let i = 0; i < BUFFER_SIZE; i++ ) {
         let sample = Math.round( Math.sin( Math.PI*2*(phase+i)*FREQ/(PHASE_SHIFT * 100) ) * (1<<12) );
         b.writeInt16LE( sample, i*2 );
     }
     return b;
 }
 
-let holding = false;
+let holding = true;
 
 function writeLoop({stream}) {
     let phase = 0;
