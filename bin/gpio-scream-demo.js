@@ -41,7 +41,7 @@ function writeLoop({stream}) {
     }
     else
         phase = 0;
-    setTimeout(() => writeTone({stream}), 100);
+    setTimeout(() => writeLoop({stream}), 100);
 }
 
 function main() {
