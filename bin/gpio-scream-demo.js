@@ -37,7 +37,10 @@ function main() {
                    log.info('Starting Scream');
                    playing = true;
                    client.playReadableStream(screamSteam);
-                   setTimeout(() => playing = false, 5000);
+                   setTimeout(() => {
+                       log.info('Done Playing');
+                       playing = false
+                   }, 5000);
                }
                else
                    log.info('Playing... Ignoring Button Press');
