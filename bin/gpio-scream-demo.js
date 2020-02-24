@@ -33,6 +33,10 @@ function main() {
                client.playReadableStream(screamSteam);
            });
        })
+       .catch(err => {
+           log.error(err.message);
+           log.error(err.stack);
+       })
 }
 
 main();
