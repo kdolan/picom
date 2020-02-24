@@ -18,7 +18,7 @@ function main() {
        .then(r => {
            client.sendMessageToCurrentChannel("GPIO Client");
 
-           const button = new Gpio(23, {
+           const button = new Gpio(21, {
                mode: Gpio.INPUT,
                pullUpDown: Gpio.PUD_UP,
                alert: true
