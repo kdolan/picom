@@ -10,7 +10,7 @@ let http = require('http');
 let server;
 let port = normalizePort(process.env.PORT || '3000');
 let log = require('loglevel');
-log.setDefaultLevel("DEBUG")
+log.setDefaultLevel("DEBUG");
 
 initApp( app => { //Init app. Provide null as mockUser (enable auth normally)
     /**

@@ -73,6 +73,15 @@ class MumbleClientService extends EventEmitter{
         currentCh.sendMessage(message);
     }
 
+    playReadableStream(readableStream){
+       const stream = this.connection.inputStream({
+            signed: true,
+            bitDepth: 16,
+            sampleRate: 48000
+        });
+        readableStream.pipe(stream)
+    }
+
     _onMessage(message, user, scope){
         log.debug(`New Message from ${user.name} in ${scope}: ${message}`);
         this.emit('message', {message, user, scope});

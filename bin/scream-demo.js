@@ -1,5 +1,4 @@
 require('dotenv').config();
-const delay = require('delay-stream');
 
 const mumble = require('mumble'),
     fs = require('fs');
