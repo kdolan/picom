@@ -31,6 +31,16 @@ function writeTone({stream, phase}) {
     stream.once( 'drain', writeTone );
 }
 
+let holding = false;
+let phase = 0;
+function writeLoop({stream}) {
+    if(holding)
+        writeTone({});
+    else
+        phase = 0;
+    setTimeout(() => writeTone(), 100);
+}
+
 function main() {
    const client = new MumbleClientService(CONFIG);
    client.connect()
@@ -51,17 +61,20 @@ function main() {
            else
                log.warn(`WARNING - No mocked glitchFilter`);
 
-           let holding = false;
+
            button.on('alert', (level, tick) => {
-               if(level) {
+               if(!level) {
                    holding = true;
                    log.info('Button Pressed');
                }
                else {
-                   holding = true;
+                   phase = 0;
+                   holding = false;
                    log.info('Button Released');
                }
            });
+
+           writeLoop({stream: client.connection.inputStream()})
        })
 
        .catch(err => {
