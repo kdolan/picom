@@ -34,10 +34,13 @@ function main() {
            let playing = false;
            button.on('alert', (level, tick) => {
                if(!playing) {
+                   log.info('Starting Scream');
                    playing = true;
                    client.playReadableStream(screamSteam);
                    setTimeout(() => playing = false, 5000);
                }
+               else
+                   log.info('Playing... Ignoring Button Press');
            });
        })
        .catch(err => {
