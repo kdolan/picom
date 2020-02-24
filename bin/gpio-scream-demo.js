@@ -22,17 +22,19 @@ function generateSound(phase=0) {
     return b;
 }
 
-function writeTone({stream, phase}) {
-    // Fill the buffer
-    while( stream.write( generateSound(phase) ) ) {}
-
-    // Wait for the buffer to drain
-    stream.once( 'drain', writeTone );
-}
-
 let holding = false;
-let phase = 0;
+
 function writeLoop({stream}) {
+    let phase = 0;
+
+    const writeTone = () => {
+        // Fill the buffer
+        while( stream.write( generateSound(phase) ) ) {}
+
+        // Wait for the buffer to drain
+        stream.once( 'drain', writeTone );
+    };
+
     if(holding) {
         writeTone({stream, phase});
         phase += 480;
