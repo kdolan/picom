@@ -11,13 +11,12 @@ const screamSteam = fs.createReadStream('./sounds/falling.wav');
 
 const CONFIG = require('../config/mumble/local');
 
-const FREQ = (1*process.env.FREQ) || 200;
-const PHASE_SHIFT = 480;
-const BUFFER_SIZE = 24;
+const FREQ = (1*process.env.FREQ) || 100;
+const PHASE_SHIFT = 240;
 
 function generateSound(phase=0) {
-    let b = new Buffer(BUFFER_SIZE*2);
-    for( let i = 0; i < BUFFER_SIZE; i++ ) {
+    let b = new Buffer(PHASE_SHIFT*2);
+    for( let i = 0; i < PHASE_SHIFT; i++ ) {
         let sample = Math.round( Math.sin( Math.PI*2*(phase+i)*FREQ/(PHASE_SHIFT * 100) ) * (1<<12) );
         b.writeInt16LE( sample, i*2 );
     }
