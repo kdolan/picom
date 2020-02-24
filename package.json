@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node bin/scream-demo.js",
-    "pi-i": "npm i pigpio"
+    "pi-i": "npm i pigpio",
+    "pi-demo": "node bin/gpio-scream-demo.js"
   },
   "repository": {
     "type": "git",
