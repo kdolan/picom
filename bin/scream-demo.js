@@ -4,12 +4,12 @@ const delay = require('delay-stream');
 const mumble = require('mumble'),
     fs = require('fs');
 
-const screamSteam = fs.createReadStream('../sounds/falling.wav');
+const screamSteam = fs.createReadStream('./sounds/falling.wav');
 
 const options = {
-    key: fs.readFileSync( '../cert/key.pem' ),
-    cert: fs.readFileSync( '../cert/cert.pem' ),
-    port: 36001
+    key: fs.readFileSync( './cert/key.pem' ),
+    cert: fs.readFileSync( './cert/cert.pem' ),
+    port: 64738
 };
 
 let globalCon;
@@ -42,7 +42,7 @@ function onInit() {
     });
     //setTimeout(() => screamSteam.pipe(stream), 10000);
     //Loopback
-    //setTimeout(() => globalCon.outputStream().pipe(delay(3000)).pipe(globalCon.inputStream() ), 15000);
+    ///setTimeout(() => globalCon.outputStream().pipe(delay(3000)).pipe(globalCon.inputStream() ), 15000);
 }
 
 function onVoice( voice ) {
