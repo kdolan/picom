@@ -43,7 +43,7 @@ function writeLoop({stream}) {
     }
     else
         phase = 0;
-    setTimeout(() => writeLoop({stream}), 100);
+    setTimeout(() => writeLoop({stream}), 20);
 }
 
 function main() {
@@ -62,7 +62,7 @@ function main() {
            });
 
            if(button.glitchFilter)
-                button.glitchFilter(10000);
+                button.glitchFilter(1000);
            else
                log.warn(`WARNING - No mocked glitchFilter`);
 
