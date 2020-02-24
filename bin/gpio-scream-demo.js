@@ -19,7 +19,6 @@ function generateSound(phase=0) {
         var sample = Math.round( Math.sin( Math.PI*2*(phase+i)*FREQ/48000 ) * (1<<12) );
         b.writeInt16LE( sample, i*2 );
     }
-    phase += 480;
     return b;
 }
 
@@ -34,8 +33,10 @@ function writeTone({stream, phase}) {
 let holding = false;
 let phase = 0;
 function writeLoop({stream}) {
-    if(holding)
-        writeTone({});
+    if(holding) {
+        writeTone({stream, phase});
+        phase += 480;
+    }
     else
         phase = 0;
     setTimeout(() => writeTone({stream}), 100);
@@ -60,7 +61,6 @@ function main() {
                 button.glitchFilter(10000);
            else
                log.warn(`WARNING - No mocked glitchFilter`);
-
 
            button.on('alert', (level, tick) => {
                if(!level) {
