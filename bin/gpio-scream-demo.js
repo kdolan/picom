@@ -33,7 +33,7 @@ function writeLoop({stream}) {
         while( stream.write( generateSound(phase) ) ) {}
 
         // Wait for the buffer to drain
-        stream.once( 'drain', writeTone );
+        stream.once( 'drain', () => log.info('Tone written') );
     };
 
     if(holding) {
