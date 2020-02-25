@@ -11,6 +11,41 @@ const screamSteam = fs.createReadStream('./sounds/falling.wav');
 
 const CONFIG = require('../config/mumble/local');
 
+const FREQ = (1*process.env.FREQ) || 100;
+const PHASE_SHIFT = 240;
+
+function generateSound(phase=0) {
+    let b = new Buffer(PHASE_SHIFT*2);
+    for( let i = 0; i < PHASE_SHIFT; i++ ) {
+        let sample = Math.round( Math.sin( Math.PI*2*(phase+i)*FREQ/(PHASE_SHIFT * 100) ) * (1<<12) );
+        b.writeInt16LE( sample, i*2 );
+    }
+    return b;
+}
+
+let holding = false;
+
+function writeLoop({stream}) {
+    let phase = 0;
+
+    const writeTone = () => {
+        // Fill the buffer
+        while( stream.write( generateSound(phase) ) ) {}
+
+        // Wait for the buffer to drain
+        stream.once( 'drain', () => log.info('Tone written') );
+    };
+
+    if(holding) {
+        log.info('Writing Tone...');
+        writeTone({stream});
+        phase += PHASE_SHIFT;
+    }
+    else
+        phase = 0;
+    setTimeout(() => writeLoop({stream}), 20);
+}
+
 function main() {
    const client = new MumbleClientService(CONFIG);
    client.connect()
@@ -27,25 +62,24 @@ function main() {
            });
 
            if(button.glitchFilter)
-                button.glitchFilter(10000);
+                button.glitchFilter(1000);
            else
                log.warn(`WARNING - No mocked glitchFilter`);
 
-           let playing = false;
            button.on('alert', (level, tick) => {
-               if(!playing) {
-                   log.info('Starting Scream');
-                   playing = true;
-                   client.playReadableStream(screamSteam);
-                   setTimeout(() => {
-                       log.info('Done Playing');
-                       playing = false
-                   }, 5000);
+               if(!level) {
+                   holding = true;
+                   log.info('Button Pressed');
                }
-               else
-                   log.info('Playing... Ignoring Button Press');
+               else {
+                   holding = false;
+                   log.info('Button Released');
+               }
            });
+
+           writeLoop({stream: client.connection.inputStream()})
        })
+
        .catch(err => {
            log.error(err.message);
            log.error(err.stack);
