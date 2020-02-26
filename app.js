@@ -10,8 +10,7 @@ let router = require('./routes/router');
 const MumbleServiceClient = require('./service/MumbleClientService').MumbleClientService;
 
 async function initMumbleClient() {
-    //TODO TERRIBLE IDEA... STOP THAT RIGHT NOW!!!!!
-    const config = require(process.env.MUMBLE_CONFIG_PATH);
+    const config = require('./config/mumble');
     const client = new MumbleServiceClient(config);
     await client.connect();
     return client;

@@ -34,7 +34,7 @@ function onInit() {
     AFK.join();
     AFK.sendMessage("The Ghost User from NodeJs is hear to murder you");
 
-    stream = globalCon.inputStream({
+    let stream = globalCon.inputStream({
         signed: true,
         bitDepth: 16,
         sampleRate: 48000

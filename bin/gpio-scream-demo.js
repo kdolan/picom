@@ -9,7 +9,7 @@ if(process.env.NODE_ENV !== "production")
 
 const screamSteam = fs.createReadStream('./sounds/falling.wav');
 
-const CONFIG = require('../config/mumble/local');
+const CONFIG = require('../config/mumble');
 
 const FREQ = (1*process.env.FREQ) || 100;
 const PHASE_SHIFT = 240;

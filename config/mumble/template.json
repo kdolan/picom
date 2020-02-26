@@ -1,0 +1,7 @@
+{
+  "server": "mumble.example.net",
+  "port": "36001",
+  "username": "NodeJs",
+  "keyPath": "./cert/key.pem",
+  "certPath": "./cert/cert.pem"
+}
