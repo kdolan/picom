@@ -57,7 +57,7 @@ function main() {
 
            const micInputStream = micInstance.getAudioStream();
            let mumbleWriteStream = client.connection.inputStream();
-           micInputStream.pipe(mumbleWriteStream);
+           micInputStream.pipe(mumbleWriteStream, {end: false});
 
            micInputStream.on('data', function(data) {
                console.log("Mic Input Stream Data: " + data.length);
