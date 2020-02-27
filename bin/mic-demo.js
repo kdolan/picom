@@ -33,7 +33,7 @@ function main() {
            button.on('alert', (level, tick) => {
                if(!level) {
                    log.info('Button Pressed');
-                       micInstance.resume();
+                   micInstance.resume();
                }
                else {
                    micInstance.pause();
@@ -48,7 +48,6 @@ function main() {
                device: "hw:CARD=Device,DEV=0",
                exitOnSilence: 0
            });
-           micInstance.start();
 
            const micInputStream = micInstance.getAudioStream();
            let mumbleWriteStream = client.connection.inputStream();
@@ -65,6 +64,9 @@ function main() {
            micInputStream.on('processExitComplete', function() {
                console.log("Got SIGNAL processExitComplete");
            });
+
+           micInstance.start();
+           micInstance.pause();
        })
        .catch(err => {
            log.error(err.message);
