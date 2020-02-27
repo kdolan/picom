@@ -55,6 +55,10 @@ function main() {
                }
            });
 
+           micInputStream.on('processExitComplete', function() {
+               console.log("Got SIGNAL processExitComplete");
+           });
+
            micInstance.start();
        })
        .catch(err => {
