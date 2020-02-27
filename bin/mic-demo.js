@@ -25,6 +25,7 @@ function main() {
                exitOnSilence: 6
            });
            const micInputStream = micInstance.getAudioStream();
+           const mumbleWriteStream = client.connection.inputStream();
 
            let isPipedToMumble = false;
            micInputStream.on('data', function(data) {
@@ -33,7 +34,7 @@ function main() {
                    isPipedToMumble = true; //Set flag to true. If no silence signal is received pipe will restart
                    setTimeout(() => {
                        if(isPipedToMumble){
-                           micInputStream.pipe(client.connection.inputStream());
+                           micInputStream.pipe(mumbleWriteStream);
                            log.info(`Beginning Audio Stream`);
                        }
                    }, 10);
@@ -47,8 +48,9 @@ function main() {
            micInputStream.on('silence', function() {
                console.log("Got SIGNAL silence");
                if(isPipedToMumble) {
-                   micInputStream.unpipe(); //Stop sending data to mumble client
+                   micInputStream.unpipe(mumbleWriteStream); //Stop sending data to mumble client
                    isPipedToMumble = false;
+                   log.info(`Stopping Audio Stream`);
                }
            });
 
