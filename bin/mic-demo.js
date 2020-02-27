@@ -30,16 +30,10 @@ function main() {
            else
                log.warn(`WARNING - No mocked glitchFilter`);
 
-           let started = false;
            button.on('alert', (level, tick) => {
                if(!level) {
-                   if(!started) {
-                       micInstance.start();
-                       started = true;
-                   }
-                   else
-                       micInstance.resume();
                    log.info('Button Pressed');
+                       micInstance.resume();
                }
                else {
                    micInstance.pause();
@@ -54,10 +48,11 @@ function main() {
                device: "hw:CARD=Device,DEV=0",
                exitOnSilence: 0
            });
+           micInstance.start();
 
            const micInputStream = micInstance.getAudioStream();
            let mumbleWriteStream = client.connection.inputStream();
-           micInputStream.pipe(mumbleWriteStream, {end: false});
+           micInputStream.pipe(mumbleWriteStream);
 
            micInputStream.on('data', function(data) {
                console.log("Mic Input Stream Data: " + data.length);
