@@ -90,7 +90,7 @@ function main() {
 
            const callLed = setupCallLed();
            setupTxButton({micInstance});
-           setupCallButton({led: callLed, sendMessageFn: client.sendMessageToCurrentChannel});
+           setupCallButton({led: callLed, sendMessageFn: (message) => client.sendMessageToCurrentChannel(message)});
 
            const micInputStream = micInstance.getAudioStream();
            let mumbleWriteStream = client.connection.inputStream();
