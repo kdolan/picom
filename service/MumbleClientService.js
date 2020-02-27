@@ -34,11 +34,12 @@ class MumbleClientService extends EventEmitter{
 
                 connection.on( 'initialized', () => {
                     log.info( `Connection to ${this.config.server} is ready to use` );
+                    
+                    connection.on( 'voice', () => this._onVoice );
+                    connection.on( `message`, () => this._onMessage);
+
                     resolve();
                 } );
-
-                connection.on( 'voice', () => this._onVoice );
-                connection.on( `message`, () => this._onMessage);
             });
         })
     }
