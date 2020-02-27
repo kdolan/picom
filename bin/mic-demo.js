@@ -1,5 +1,5 @@
 require('dotenv').config();
-const Mic = require('../lib/mic');
+const Mic = require('mic');
 const MumbleClientService = require('../service/MumbleClientService').MumbleClientService;
 const log = require('loglevel');
 if(process.env.NODE_ENV !== "production")
@@ -46,10 +46,10 @@ function main() {
                console.log("Error in Input Stream: " + err);
            });
 
-           micInputStream.on('silence-event', function() {
+           micInputStream.on('silence', function() {
                console.log("Got SIGNAL silence");
                if(isPipedToMumble) {
-                   micInputStream.unpipe(mumbleWriteStream); //Stop sending data to mumble client
+                   //micInputStream.unpipe(mumbleWriteStream); //Stop sending data to mumble client
                    isPipedToMumble = false;
                    log.info(`Stopping Audio Stream`);
                }
