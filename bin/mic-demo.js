@@ -21,11 +21,21 @@ function main() {
                rate: '88000',
                channels: '1',
                debug: true,
-               exitOnSilence: 6,
-               device: "hw1,0"
+               device: "hw1,0",
+               exitOnSilence: 6
            });
            const micInputStream = micInstance.getAudioStream();
            micInputStream.pipe(client.connection.inputStream());
+
+           micInputStream.on('data', function(data) {
+               console.log("Mic Input Stream Data: " + data.length);
+           });
+
+           micInputStream.on('silence', function() {
+               console.log("Got SIGNAL silence");
+           });
+
+           micInstance.start();
        })
        .catch(err => {
            log.error(err.message);
