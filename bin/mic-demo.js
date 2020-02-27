@@ -33,8 +33,10 @@ function main() {
            let started = false;
            button.on('alert', (level, tick) => {
                if(!level) {
-                   if(!started)
+                   if(!started) {
                        micInstance.start();
+                       started = true;
+                   }
                    else
                        micInstance.resume();
                    log.info('Button Pressed');
