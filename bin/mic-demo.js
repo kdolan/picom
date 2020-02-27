@@ -2,6 +2,7 @@ require('dotenv').config();
 const Mic = require('mic');
 const MumbleClientService = require('../service/MumbleClientService').MumbleClientService;
 const Gpio = require('../service/Gpio').Gpio;
+const Speaker = require('speaker');
 
 const CALL_BTN_PIN=20;
 const TX_BTN_PIN=21;
@@ -87,6 +88,15 @@ function main() {
                device: "hw:CARD=Device,DEV=0",
                exitOnSilence: 0
            });
+
+           const speaker = new Speaker({
+               channels: 1,
+               bitDepth: 16,
+               sampleRate: 88000,
+               device: "plughw:CARD=Device,DEV=0"
+           });
+           const outputStream = client.connection.user.outputStream(true);
+           outputStream.pipe(speaker);
 
            const callLed = setupCallLed();
            setupTxButton({micInstance});
