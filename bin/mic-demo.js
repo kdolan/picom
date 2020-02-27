@@ -46,7 +46,7 @@ function main() {
                console.log("Error in Input Stream: " + err);
            });
 
-           micInputStream.on('silence', function() {
+           micInputStream.on('silence-event', function() {
                console.log("Got SIGNAL silence");
                if(isPipedToMumble) {
                    micInputStream.unpipe(mumbleWriteStream); //Stop sending data to mumble client
