@@ -21,7 +21,7 @@ function main() {
                rate: '88000',
                channels: '1',
                debug: true,
-               device: "hw1,0",
+               device: "hw:CARD=Device,DEV=0",
                exitOnSilence: 6
            });
            const micInputStream = micInstance.getAudioStream();
