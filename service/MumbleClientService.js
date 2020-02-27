@@ -88,6 +88,7 @@ class MumbleClientService extends EventEmitter{
     }
 
     _onVoice(voice){
+        log.debug(`Received Voice - Data Length: ${voice.length}`);
         this.emit('voice', voice);
     }
 }
