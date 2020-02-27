@@ -21,7 +21,8 @@ function main() {
                rate: '88000',
                channels: '1',
                debug: true,
-               exitOnSilence: 6
+               exitOnSilence: 6,
+               device: "hw1,0"
            });
            const micInputStream = micInstance.getAudioStream();
            micInputStream.pipe(client.connection.inputStream());
