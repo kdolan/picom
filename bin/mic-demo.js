@@ -1,5 +1,5 @@
 require('dotenv').config();
-const Mic = require('mic');
+const Mic = require('../lib/mic');
 const MumbleClientService = require('../service/MumbleClientService').MumbleClientService;
 const log = require('loglevel');
 if(process.env.NODE_ENV !== "production")
