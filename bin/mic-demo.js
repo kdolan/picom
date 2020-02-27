@@ -52,7 +52,7 @@ function main() {
                device: "hw:CARD=Device,DEV=0",
                exitOnSilence: 0
            });
-           
+
            const micInputStream = micInstance.getAudioStream();
            let mumbleWriteStream = client.connection.inputStream();
            micInputStream.pipe(mumbleWriteStream);
