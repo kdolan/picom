@@ -37,8 +37,8 @@ class MumbleClientService extends EventEmitter{
                     resolve();
                 } );
 
-                connection.on( 'voice', this._onVoice );
-                connection.on( `message`, this._onMessage);
+                connection.on( 'voice', () => this._onVoice );
+                connection.on( `message`, () => this._onMessage);
             });
         })
     }
