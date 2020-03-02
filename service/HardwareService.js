@@ -31,6 +31,8 @@ class HardwareService extends EventEmitter{
         if(btn.glitchFilter)
             btn.glitchFilter(GLITCH_FILTER);
 
+        log.debug(`${eventName} button setup on ${pin}`);
+
         btn.on && btn.on('alert', (level, tick) => {
             if(!level) {
                 this.emit(`${eventName}-down`, tick);
