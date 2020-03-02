@@ -90,9 +90,8 @@ function main() {
            });
 
            const speaker = new Speaker({
-               channels: 2,
+               channels: 1,
                bitDepth: 16,
-               sampleRate: 88000,
                device: "plughw:1,0"
            });
            const outputStream = client.connection.outputStream(undefined, true);
