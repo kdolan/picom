@@ -6,6 +6,7 @@ const log = require('loglevel');
 
 const UP = "UP";
 const DOWN = "DOWN";
+const LATCH_TIME_MS=500;
 
 class PiComService{
     constructor({mumbleConfig, hardwareConfig}) {
@@ -14,8 +15,12 @@ class PiComService{
 
         this.state = {
             calling: false,
-            transmitting: false
+            transmitting: false,
+            micLatch: false
         };
+
+        this._lastTxHoldDurationMs = null;
+        this._txDownTime = null;
     }
 
     async setup(){
@@ -106,16 +111,35 @@ class PiComService{
     txEvent(state){
         this.state.transmitting = state === DOWN;
         this.hardware.setTalkLed(state === DOWN);
-        if(state === DOWN)
+        if(state === DOWN) {
             this.mic.resume();
-        else
-            this.mic.pause();
+            this._txDownTime = new Date().getTime();
+        }
+        else {
+            this.state.micLatch = false;
+            this._latchLogic();
+            if(!this.state.micLatch)
+                this.mic.pause();
+        }
     }
 
     callEvent(state){
         this.state.calling = state === DOWN;
         this.hardware.setCallLed(state === DOWN);
         this.mumble.sendMessageToCurrentChannel(state === DOWN ? "CALLING" : "END CALLING");
+    }
+
+    _latchLogic(){
+        const upTime = new Date().getTime();
+        const diff = upTime - this._txDownTime;
+        if(this._lastTxHoldDurationMs){
+            if(this._lastTxHoldDurationMs <= LATCH_TIME_MS && diff <= LATCH_TIME_MS){
+                this._lastTxHoldDurationMs = null;
+                this.state.micLatch = true;
+                return;
+            }
+        }
+        this._lastTxHoldDurationMs = diff;
     }
 }
 
