@@ -39,8 +39,10 @@ class PiComService{
     }
 
     unLatchMic(){
-        if(this.state.micLatch)
+        if(this.state.micLatch) {
+            log.info(`Triggering Remove Mic Unlatch at ${new Date().toTimeString()}`);
             this._txEvent(UP); //Simulate releasing talk button event
+        }
         else{
             const message = `Cannot unlatch. Mic not latched`;
             log.error(message);
