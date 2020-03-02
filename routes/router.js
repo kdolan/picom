@@ -8,6 +8,10 @@ exports.configureRoutes = function (app, piCom) {
         res.json({status: 'ok'});
     });
 
-    app.get('/status', (req, res) => res.json({status: piCom.status, mumbleReady: piCom.mumble.connection.ready, }));
+    app.get('/status', (req, res) => res.json(
+        {
+            status: piCom.state,
+            mumbleReady: piCom.mumble.connection.ready,
+        }));
 
 };
