@@ -109,17 +109,21 @@ class PiComService{
     }
 
     txEvent(state){
-        this.state.transmitting = state === DOWN;
-        this.hardware.setTalkLed(state === DOWN);
         if(state === DOWN) {
             this.mic.resume();
             this._txDownTime = new Date().getTime();
+
+            this.state.transmitting = true;
+            this.hardware.setTalkLed(true);
         }
         else {
             this.state.micLatch = false;
             this._latchLogic();
-            if(!this.state.micLatch)
+            if(!this.state.micLatch) {
                 this.mic.pause();
+                this.state.transmitting = false;
+                this.hardware.setTalkLed(false);
+            }
         }
     }
 
