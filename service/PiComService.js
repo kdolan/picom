@@ -138,6 +138,7 @@ class PiComService{
         const diff = upTime - this._txDownTime;
         if(this._lastTxHoldDurationMs){
             if(this._lastTxHoldDurationMs <= LATCH_TIME_MS && diff <= LATCH_TIME_MS){
+                log.debug(`Enabling Latch: Previous Hold ${this._lastTxHoldDurationMs}, Current Hold: ${diff}`);
                 this._lastTxHoldDurationMs = null;
                 this.state.micLatch = true;
                 return;
