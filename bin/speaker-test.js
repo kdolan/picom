@@ -5,7 +5,7 @@
 
 const Readable = require('stream').Readable
 const bufferAlloc = require('buffer-alloc')
-const Speaker = require('../')
+const Speaker = require('speaker')
 
 // the frequency to play
 const freq = parseFloat(process.argv[2], 10) || 440.0 // Concert A, default tone
