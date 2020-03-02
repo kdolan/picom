@@ -53,11 +53,15 @@ class HardwareService extends EventEmitter{
 
     _setupCallLed(){
         this.callLed = new Gpio(this.callLedPin, {mode: Gpio.OUTPUT});
+        this.callLed.digitalWrite(0);
+
         log.debug('Call LED setup on ' + this.callLedPin);
     }
 
     _setupTalkLed(){
         this.talkLed = new Gpio(this.talkLedPin, {mode: Gpio.OUTPUT});
+        this.talkLed.digitalWrite(0);
+
         log.debug('Talk LED setup on ' + this.talkLedPin);
     }
 
