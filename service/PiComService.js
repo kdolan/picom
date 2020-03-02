@@ -141,11 +141,12 @@ class PiComService{
         if(this._txTimes.length === 2){
             const firstHoldDuration = this._stopTxTimes[1] - this._txTimes[1].getTime();
             const secondHoldDuration = this._stopTxTimes[0] - this._txTimes[0].getTime();
-            const timeBetweenTxEvents = this._txTimes[1].getTime(); - this._txTimes[0].getTime();
+            const timeBetweenTxEvents = this._txTimes[1].getTime() - this._txTimes[0].getTime();
 
             if(firstHoldDuration <= LATCH_TIME_MS && secondHoldDuration <= LATCH_TIME_MS && timeBetweenTxEvents <= LATCH_TIME_MS * 1.5){
                 log.debug(`Enabling Latch: First Hold ${firstHoldDuration}, Second Hold: ${secondHoldDuration}, Tx Interval: ${timeBetweenTxEvents}`);
                 this.state.micLatch = true;
+                return;
             }
             else
                 log.debug(`Not Latching: First Hold ${firstHoldDuration}, Second Hold: ${secondHoldDuration}, Tx Interval: ${timeBetweenTxEvents}`);
