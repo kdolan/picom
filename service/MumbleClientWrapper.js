@@ -4,7 +4,7 @@ const  EventEmitter = require('events');
 
 const RETRY_LIMIT=100000;
 
-class MumbleClientService extends EventEmitter{
+class MumbleClientWrapper extends EventEmitter{
     constructor({server, port, username, key, cert}) {
         super();
 
@@ -46,25 +46,30 @@ class MumbleClientService extends EventEmitter{
 
     async joinChannel(name){
         return new Promise((resolve, reject) => {
-            const channel = this.connection.channelByName(name);
-            if(!channel){
-                reject({message: "Channel does not exist"});
-                return;
-            }
-            channel.join();
-
-            let retryCount = 0;
-            const whileLoop  = () => {
-                retryCount++;
-                if(channel.id !== this.connection.user.channel.id) {
-                    if(retryCount > RETRY_LIMIT)
-                        reject({message: "Max retry exceeded"});
-                    setTimeout(whileLoop, 0);
+            try {
+                const channel = this.connection.channelByName(name);
+                if (!channel) {
+                    reject({message: "Channel does not exist"});
+                    return;
                 }
-                else
-                    resolve(channel);
-            };
-            whileLoop();
+                channel.join();
+
+                let retryCount = 0;
+                const whileLoop = () => {
+                    retryCount++;
+                    if (channel.id !== this.connection.user.channel.id) {
+                        if (retryCount > RETRY_LIMIT)
+                            reject({message: "Max retry exceeded"});
+                        setTimeout(whileLoop, 0);
+                    } else
+                        resolve(channel);
+                };
+                whileLoop();
+            }
+            catch (e) {
+                log.error(`Error joining channel`, e);
+                reject(e);
+            }
         });
     }
 
@@ -94,4 +99,4 @@ class MumbleClientService extends EventEmitter{
     }
 }
 
-module.exports.MumbleClientService = MumbleClientService;
+module.exports.MumbleClientWrapper = MumbleClientWrapper;

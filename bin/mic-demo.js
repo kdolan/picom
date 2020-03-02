@@ -1,13 +1,13 @@
 require('dotenv').config();
 const Mic = require('mic');
-const MumbleClientService = require('../service/MumbleClientService').MumbleClientService;
+const MumbleClientService = require('../service/MumbleClientWrapper').MumbleClientService;
 const Gpio = require('../service/Gpio').Gpio;
 const Speaker = require('speaker');
 
 const CALL_BTN_PIN=20;
 const TX_BTN_PIN=21;
 const CALL_LED_PIN=26;
-const GLITH_FILTER=1000;
+const GLITCH_FILTER=1000;
 
 const log = require('loglevel');
 if(process.env.NODE_ENV !== "production")
@@ -24,7 +24,7 @@ function setupTxButton({micInstance}) {
     });
 
     if(txButton.glitchFilter)
-        txButton.glitchFilter(GLITH_FILTER);
+        txButton.glitchFilter(GLITCH_FILTER);
     else
         log.warn(`WARNING - No mocked glitchFilter`);
 
@@ -48,7 +48,7 @@ function setupCallButton({led, sendMessageFn}) {
     });
 
     if(callButton.glitchFilter)
-        callButton.glitchFilter(GLITH_FILTER);
+        callButton.glitchFilter(GLITCH_FILTER);
     else
         log.warn(`WARNING - No mocked glitchFilter`);
 
@@ -94,6 +94,7 @@ function main() {
                bitDepth: 16,
                device: "plughw:1,0"
            });
+
            const outputStream = client.connection.outputStream(undefined, true);
            outputStream.pipe(speaker);
 

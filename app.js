@@ -7,23 +7,23 @@ let logger = require('loglevel');
 
 let router = require('./routes/router');
 
-const MumbleServiceClient = require('./service/MumbleClientService').MumbleClientService;
+const PiComService = require('./service/PiComService').PiComService;
+const MUMBLE_CONFIG = require('./config/mumble');
+const HARDWARE_CONFIG = require('./config/hardware');
 
-async function initMumbleClient() {
-    const config = require('./config/mumble');
-    const client = new MumbleServiceClient(config);
-    await client.connect();
-    return client;
+async function initPiComService() {
+    const piCom = new PiComService({mumbleConfig: MUMBLE_CONFIG, hardwareConfig: HARDWARE_CONFIG});
+    await piCom.setup();
+    return piCom;
 }
 
 //Starts the application given the db and returns the express app
-async function startApp(app, client) {
-    const ch = await client.joinChannel("Landing Channel");
-    client.sendMessageToCurrentChannel("Test");
+async function startApp(app, piCom) {
+    const ch = await piCom.mumble.joinChannel("Landing Channel");
 
     //Standard middleware
     expressMiddlewareInit(app);
-    router.configureRoutes(app, client);
+    router.configureRoutes(app, piCom);
 
     errorHandlingMiddleware(app);
 }
@@ -64,8 +64,8 @@ logger.debug("Environment: " + envName);
 
 //Start the application (Pass in startApp function as callback)
 async function initApp(callback) {
-        const cleint = await initMumbleClient();
-        await startApp(app, cleint);
+        const piCom = await initPiComService();
+        await startApp(app, piCom);
         callback(app);
 }
 
