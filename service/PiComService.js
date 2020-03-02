@@ -144,6 +144,7 @@ class PiComService{
                 return;
             }
         }
+        this.state.micLatch = false;
         this._lastTxHoldDurationMs = diff;
     }
 }
