@@ -3,6 +3,7 @@ const {MumbleClientWrapper} = require("./MumbleClientWrapper");
 const Speaker = require('./Speaker');
 const Mic = require('mic');
 const log = require('loglevel');
+const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
 
 const UP = "UP";
 const DOWN = "DOWN";
@@ -41,8 +42,9 @@ class PiComService{
         if(this.state.micLatch)
             this._txEvent(UP); //Simulate releasing talk button event
         else{
-            log.error(`Cannot unlatch. Mic not latched`);
-            throw new Error("Cannot unlatch. Mic not latched");
+            const message = `Cannot unlatch. Mic not latched`;
+            log.error(message);
+            throw new ErrorWithStatusCode({code: 400, message});
         }
     }
 
