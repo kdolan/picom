@@ -96,6 +96,11 @@ function main() {
                device: "plughw:1,0"
            });
            const outputStream = client.connection.user.outputStream(true);
+
+           let logger = function(d) {
+               process.stdout.write('Voice Raw:' + d + '\n');
+           };
+
            outputStream.pipe(process.stdout);
            //outputStream.pipe(speaker);
 
