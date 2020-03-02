@@ -95,12 +95,9 @@ function main() {
                sampleRate: 88000,
                device: "plughw:1,0"
            });
-           const outputStream = client.connection.user.outputStream(null, true);
+           const outputStream = client.connection.user.outputStream(true);
            outputStream.pipe(speaker);
-
-           client.on('voice', data => {
-
-           });
+           client.connection.user.outputStream(true).pipe(client.connection.user.inputStream());
 
            const callLed = setupCallLed();
            setupTxButton({micInstance});
