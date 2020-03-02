@@ -19,8 +19,8 @@ class PiComService{
             micLatch: false
         };
 
-        this._lastTxHoldDurationMs = null;
-        this._txDownTime = null;
+        this._txTimes = [];
+        this._stopTxTimes = [];
     }
 
     async setup(){
@@ -111,14 +111,18 @@ class PiComService{
     txEvent(state){
         if(state === DOWN) {
             this.mic.resume();
-            this._txDownTime = new Date().getTime();
+            this._txTimes.unshift(new Date());
+            this._txTimes = this._txTimes.slice(0,2);
 
             this.state.transmitting = true;
             this.hardware.setTalkLed(true);
         }
         else {
+            this._stopTxTimes.unshift(new Date());
+            this._stopTxTimes = this._stopTxTimes.slice(0,2);
+
             this.state.micLatch = false;
-            this._latchLogic();
+            this._latchLogic(); //Determines if the mic should be latched by setting state.micLatch
             if(!this.state.micLatch) {
                 this.mic.pause();
                 this.state.transmitting = false;
@@ -134,18 +138,17 @@ class PiComService{
     }
 
     _latchLogic(){
-        const upTime = new Date().getTime();
-        const diff = upTime - this._txDownTime;
-        if(this._lastTxHoldDurationMs){
-            if(this._lastTxHoldDurationMs <= LATCH_TIME_MS && diff <= LATCH_TIME_MS){
-                log.debug(`Enabling Latch: Previous Hold ${this._lastTxHoldDurationMs}, Current Hold: ${diff}`);
-                this._lastTxHoldDurationMs = null;
+        if(this._txTimes.length === 2){
+            const firstHoldDuration = this._stopTxTimes[1] - this._txTimes[1].getTime();
+            const secondHoldDuration = this._stopTxTimes[0] - this._txTimes[0].getTime();
+            const timeBetweenTxEvents = this._txTimes[1].getTime(); - this._txTimes[0].getTime();
+
+            if(firstHoldDuration <= LATCH_TIME_MS && secondHoldDuration <= LATCH_TIME_MS && timeBetweenTxEvents <= LATCH_TIME_MS * 1.5){
+                log.debug(`Enabling Latch: First Hold ${firstHoldDuration}, Second Hold: ${secondHoldDuration}, Tx Interval: ${timeBetweenTxEvents}`);
                 this.state.micLatch = true;
-                return;
             }
         }
         this.state.micLatch = false;
-        this._lastTxHoldDurationMs = diff;
     }
 }
 
