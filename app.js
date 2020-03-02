@@ -20,7 +20,6 @@ async function initPiComService() {
 //Starts the application given the db and returns the express app
 async function startApp(app, piCom) {
     const ch = await piCom.mumble.joinChannel("Landing Channel");
-    piCom.mumble.sendMessageToCurrentChannel("Test");
 
     //Standard middleware
     expressMiddlewareInit(app);
