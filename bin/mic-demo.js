@@ -95,14 +95,8 @@ function main() {
                sampleRate: 88000,
                device: "plughw:1,0"
            });
-           const outputStream = client.connection.user.outputStream(true);
-
-           let logger = function(d) {
-               process.stdout.write('Voice Raw:' + d + '\n');
-           };
-
-           outputStream.pipe(logger);
-           //outputStream.pipe(speaker);
+           const outputStream = client.connection.outputStream(undefined, true);
+           outputStream.pipe(speaker);
 
            const callLed = setupCallLed();
            setupTxButton({micInstance});
