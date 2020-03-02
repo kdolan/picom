@@ -9,6 +9,9 @@ const TX_BTN_PIN=21;
 const CALL_LED_PIN=26;
 const GLITH_FILTER=1000;
 
+const fs = require("fs");
+let fileStream = fs.createWriteStream("voice.dat");
+
 const log = require('loglevel');
 if(process.env.NODE_ENV !== "production")
     log.setDefaultLevel("debug");
@@ -90,13 +93,14 @@ function main() {
            });
 
            const speaker = new Speaker({
-               channels: 1,
+               channels: 2,
                bitDepth: 16,
                sampleRate: 88000,
                device: "plughw:1,0"
            });
-           const outputStream = client.connection.user.outputStream(true);
-           outputStream.pipe(speaker);
+           const outputStream = client.connection.user.outputStream();
+           outputStream.pipe(fileStream);
+           //outputStream.pipe(speaker);
 
            const callLed = setupCallLed();
            setupTxButton({micInstance});
