@@ -15,10 +15,14 @@ exports.configureRoutes = function (app, piCom) {
             mumbleReady: piCom.mumble.connection.ready,
         }));
 
-    app.get('/unlatch', (req, res) => res.json(
-        {
-            status: piCom.state,
-            mumbleReady: piCom.mumble.connection.ready,
-        }));
+    //TODO Not get
+    app.get('/unlatch', (req, res) => {
+        piCom.unLatchMic();
+        res.json(
+            {
+                status: piCom.state,
+                mumbleReady: piCom.mumble.connection.ready,
+            });
+    });
 
 };
