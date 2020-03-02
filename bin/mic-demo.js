@@ -90,14 +90,13 @@ function main() {
            });
 
            const speaker = new Speaker({
-               channels: 2,
-               bitDepth: 16,
-               sampleRate: 88000,
+               //channels: 2,
+               //bitDepth: 16,
+               //sampleRate: 88000,
                device: "plughw:1,0"
            });
            const outputStream = client.connection.user.outputStream(true);
            outputStream.pipe(speaker);
-           client.connection.user.outputStream(true).pipe(client.connection.inputStream());
 
            const callLed = setupCallLed();
            setupTxButton({micInstance});
