@@ -3,6 +3,7 @@ const {MumbleClientWrapper} = require("./MumbleClientWrapper");
 const Speaker = require('./Speaker');
 const Mic = require('mic');
 const log = require('loglevel');
+const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
 
 const UP = "UP";
 const DOWN = "DOWN";
@@ -36,7 +37,18 @@ class PiComService{
 
        this._bindHardwareEvents();
     }
-
+  
+    unLatchMic(){
+        if(this.state.micLatch) {
+            log.info(`Triggering Remove Mic Unlatch at ${new Date().toTimeString()}`);
+            this._txEvent(UP); //Simulate releasing talk button event
+        }
+        else{
+            const message = `Cannot unlatch. Mic not latched`;
+            log.error(message);
+            throw new ErrorWithStatusCode({code: 400, message});
+        }
+    }
     _setupAudio(){
         try {
             this._setupMic();
@@ -101,14 +113,14 @@ class PiComService{
     }
 
     _bindHardwareEvents(){
-        this.hardware.on('txButton-down', () => this.txEvent(DOWN));
-        this.hardware.on('txButton-up', () => this.txEvent(UP));
+        this.hardware.on('txButton-down', () => this._txEvent(DOWN));
+        this.hardware.on('txButton-up', () => this._txEvent(UP));
 
-        this.hardware.on('callButton-down', () => this.callEvent(DOWN));
-        this.hardware.on('callButton-up', () => this.callEvent(UP));
+        this.hardware.on('callButton-down', () => this._callEvent(DOWN));
+        this.hardware.on('callButton-up', () => this._callEvent(UP));
     }
 
-    txEvent(state){
+    _txEvent(state){
         if(state === DOWN) {
             this.mic.resume();
             this._txTimes.unshift(new Date());
@@ -131,7 +143,7 @@ class PiComService{
         }
     }
 
-    callEvent(state){
+    _callEvent(state){
         this.state.calling = state === DOWN;
         this.hardware.setCallLed(state === DOWN);
         this.mumble.sendMessageToCurrentChannel(state === DOWN ? "CALLING" : "END CALLING");
