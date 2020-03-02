@@ -146,6 +146,7 @@ class PiComService{
             if(firstHoldDuration <= LATCH_TIME_MS && secondHoldDuration <= LATCH_TIME_MS && timeBetweenTxEvents <= LATCH_TIME_MS * 1.5){
                 log.debug(`Enabling Latch: First Hold ${firstHoldDuration}, Second Hold: ${secondHoldDuration}, Tx Interval: ${timeBetweenTxEvents}`);
                 this.state.micLatch = true;
+                this._txTimes = [];
                 return;
             }
             else
