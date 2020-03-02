@@ -101,7 +101,7 @@ function main() {
                process.stdout.write('Voice Raw:' + d + '\n');
            };
 
-           outputStream.pipe(process.stdout);
+           outputStream.pipe(logger);
            //outputStream.pipe(speaker);
 
            const callLed = setupCallLed();
