@@ -37,7 +37,7 @@ class PiComService{
 
        this._bindHardwareEvents();
     }
-
+  
     unLatchMic(){
         if(this.state.micLatch) {
             log.info(`Triggering Remove Mic Unlatch at ${new Date().toTimeString()}`);
@@ -49,7 +49,6 @@ class PiComService{
             throw new ErrorWithStatusCode({code: 400, message});
         }
     }
-
     _setupAudio(){
         try {
             this._setupMic();

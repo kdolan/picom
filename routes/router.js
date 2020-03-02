@@ -24,5 +24,4 @@ exports.configureRoutes = function (app, piCom) {
                 mumbleReady: piCom.mumble.connection.ready,
             });
     });
-
 };
