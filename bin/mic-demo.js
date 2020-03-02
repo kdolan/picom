@@ -100,6 +100,7 @@ function main() {
            });
            const outputStream = client.connection.user.outputStream();
            outputStream.pipe(fileStream);
+           process.stdin.pipe(speaker);
            //outputStream.pipe(speaker);
 
            const callLed = setupCallLed();
