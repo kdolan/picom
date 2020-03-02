@@ -93,7 +93,7 @@ function main() {
                channels: 1,
                bitDepth: 16,
                sampleRate: 88000,
-               device: "plughw:CARD=Device,DEV=0"
+               device: "plughw:1,0"
            });
            const outputStream = client.connection.user.outputStream(true);
            outputStream.pipe(speaker);
