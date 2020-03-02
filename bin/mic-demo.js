@@ -97,7 +97,7 @@ function main() {
            });
            const outputStream = client.connection.user.outputStream(true);
            outputStream.pipe(speaker);
-           client.connection.user.outputStream(true).pipe(client.connection.user.inputStream());
+           client.connection.user.outputStream(true).pipe(client.connection.inputStream());
 
            const callLed = setupCallLed();
            setupTxButton({micInstance});
