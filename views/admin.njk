@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col align-self-center">
+            <h1>Pi Communicator Admin</h1>
+            <form>
+                <div class="form-group">
+                    <label for="mumbleServer">Mumble Server</label>
+                    <input type="text" class="form-control" id="mumbleServer" placeholder="" value="{{config.server}}">
+                </div>
+                <div class="form-group">
+                    <label for="mumbleServerPort">Mumble Server Port</label>
+                    <input type="text" class="form-control" id="mumbleServerPort" placeholder="" value="{{config.port}}">
+                </div>
+                <div class="form-group">
+                    <label for="channelName">Client Name</label>
+                    <input type="text" class="form-control" id="channelName" placeholder="Lighting" value="{{config.defaultChannelName}}">
+                    <small class="form-text text-muted">This name will be displayed to other users</small>
+                </div>
+                <div class="form-group">
+                    <label for="clientName">Username</label>
+                    <input type="text" class="form-control" id="clientName" placeholder="Stage" value="{{config.username}}">
+                    <small class="form-text text-muted">This is the name of the channel that will be joined by default</small>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="save()">Save and Reconnect</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function save(){
+        $.ajax({
+            url: '/v1/mumble/configure',
+            type: 'POST',
+            data: {
+                server: document.getElementById("mumbleServer").value,
+                port: document.getElementById("mumbleServerPort").value,
+                username: document.getElementById("clientName").value,
+                defaultChannelName: document.getElementById("channelName").value,
+            },
+            success: function(result) {
+                alert("Reconfigured and mumble reconnected");
+            },
+            error: function (result) {
+                alert("Error - Check Log");
+            }
+        });
+    }
+</script>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -4,6 +4,8 @@ let morgan = require('morgan');
 let bodyParser = require('body-parser');
 let helmet = require('helmet');
 let logger = require('loglevel');
+const path = require('path');
+const nunjucks = require('nunjucks');
 
 let router = require('./routes/router');
 
@@ -19,16 +21,19 @@ async function initPiComService() {
 
 //Starts the application given the db and returns the express app
 async function startApp(app, piCom) {
-    const ch = await piCom.mumble.joinChannel("Landing Channel");
-
     //Standard middleware
-    expressMiddlewareInit(app);
-    router.configureRoutes(app, piCom);
+    expressMiddlewareInit(app, piCom);
+    router.configureRoutes(app);
 
     errorHandlingMiddleware(app);
 }
 
-function expressMiddlewareInit(app){
+function expressMiddlewareInit(app, piCom){
+    nunjucks.configure('views', {
+        autoescape: true,
+        express: app
+    });
+
     app.use(helmet());
 
     // uncomment after placing your favicon in /public
@@ -36,6 +41,14 @@ function expressMiddlewareInit(app){
     app.use(morgan('dev', {stream: logger.stream}));
     app.use(bodyParser.json({ extended: true, limit: '25mb' }));
     app.use(bodyParser.urlencoded({extended: false}));
+    //Static Files
+    app.use(express.static(path.join(__dirname, 'public')));
+
+    //Add piCom to routes
+    app.use((req, res, next) => {
+        req.piCom = piCom;
+        next();
+    });
 }
 
 function errorHandlingMiddleware(app){

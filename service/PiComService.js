@@ -14,6 +14,9 @@ class PiComService{
         this.mumble = new MumbleClientWrapper(mumbleConfig);
         this.hardware = new HardwareService(hardwareConfig);
 
+        this.mumbleConfig = mumbleConfig;
+        this.hardwareConfig = hardwareConfig;
+
         this.state = {
             calling: false,
             transmitting: false,
@@ -24,18 +27,35 @@ class PiComService{
         this._stopTxTimes = [];
     }
 
+    async reconfigureMumbleAndReconnect(newConfig){
+        this.mumbleConfig = newConfig;
+        await this.mumble.disconnect();
+        this.mumble = new MumbleClientWrapper(newConfig);
+        await this._connectMumble();
+    }
+
     async setup(){
-       let clientConnectionPromise = this.mumble.connect();
-       this.hardware.setup();
-       //Wait for mumble client to be ready
-       await clientConnectionPromise;
+        this.hardware.setup();
+        await this._connectMumble();
+        this._bindHardwareEvents();
+    }
 
-       if(process.env.DEBUG_DISABLE_AUDIO_HARDWARE !== "TRUE")
-            this._setupAudio();
-       else
-           log.warn(`Hardware Audio Disabled. DEBUG_DISABLE_AUDIO_HARDWARE is set`);
-
-       this._bindHardwareEvents();
+    async _connectMumble(){
+        await this.mumble.connect();
+        //Audio always needs to be configured after the mumble client is connected
+        this._setupAudio();
+        //If Default Channel Set Join it
+        if(this.mumbleConfig.defaultChannelName) {
+            try {
+                await this.mumble.joinChannel(this.mumbleConfig.defaultChannelName);
+            }
+            catch (err) {
+                if(err.code === 404)
+                    log.warn(`The Default Channel '${this.mumbleConfig.defaultChannelName}' does not exist. Client will stay in root channel`);
+                else
+                    throw err;
+            }
+        }
     }
   
     unLatchMic(){
@@ -50,6 +70,11 @@ class PiComService{
         }
     }
     _setupAudio(){
+        if(!process.env.DEBUG_DISABLE_AUDIO_HARDWARE !== "TRUE") {
+            log.warn(`Hardware Audio Disabled. DEBUG_DISABLE_AUDIO_HARDWARE is set`);
+            return;
+        }
+
         try {
             this._setupMic();
 

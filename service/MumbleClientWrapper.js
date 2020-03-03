@@ -1,8 +1,9 @@
 const mumble = require('mumble');
 const log = require('loglevel');
 const  EventEmitter = require('events');
+const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
 
-const RETRY_LIMIT=100000;
+const RETRY_LIMIT=1000;
 
 class MumbleClientWrapper extends EventEmitter{
     constructor({server, port, username, key, cert}) {
@@ -41,7 +42,12 @@ class MumbleClientWrapper extends EventEmitter{
                     resolve();
                 } );
             });
-        })
+        });
+    }
+
+    async disconnect(){
+        log.info( `Disconnecting from ${this.config.server}` );
+        this.connection.disconnect();
     }
 
     async joinChannel(name){
@@ -49,7 +55,8 @@ class MumbleClientWrapper extends EventEmitter{
             try {
                 const channel = this.connection.channelByName(name);
                 if (!channel) {
-                    reject({message: "Channel does not exist"});
+                    log.error(`Error joining channel '${name}'. It does not exist`);
+                    reject(new ErrorWithStatusCode({message: "Channel does not exist", code: 404}));
                     return;
                 }
                 channel.join();
