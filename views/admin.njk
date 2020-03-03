@@ -25,14 +25,14 @@
                     <input type="text" class="form-control" id="mumbleServerPort" placeholder="" value="{{config.port}}">
                 </div>
                 <div class="form-group">
-                    <label for="channelName">Client Name</label>
+                    <label for="channelName">Default Channel</label>
                     <input type="text" class="form-control" id="channelName" placeholder="Lighting" value="{{config.defaultChannelName}}">
-                    <small class="form-text text-muted">This name will be displayed to other users</small>
+                    <small class="form-text text-muted">This is the name of the channel that will be joined by default</small>
                 </div>
                 <div class="form-group">
-                    <label for="clientName">Username</label>
+                    <label for="clientName">Client Name</label>
                     <input type="text" class="form-control" id="clientName" placeholder="Stage" value="{{config.username}}">
-                    <small class="form-text text-muted">This is the name of the channel that will be joined by default</small>
+                    <small class="form-text text-muted">This name will be displayed to other users</small>
                 </div>
                 <button type="button" class="btn btn-primary" onclick="save()">Save and Reconnect</button>
             </form>
