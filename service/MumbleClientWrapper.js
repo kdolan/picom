@@ -44,16 +44,18 @@ class MumbleClientWrapper extends EventEmitter{
 
                 connection.authenticate( this.config.username, null );
 
-                connection.on('error', (err) => {
+                const connErrCb = (err) => {
                     log.error( `Mumble Connection Failed - Error Establishing Mumble Connection`, err );
                     reject(new ErrorWithStatusCode( {code: 500, message: "Mumble Connection Error", innerError: error}));
-                });
+                };
+
+                connection.on('error', connErrCb);
 
                 connection.on( 'initialized', () => {
                     log.info( `Connection to ${this.config.server} is ready to use` );
 
                     //Remove the local error listener above
-                    connection.removeAllListener('error');
+                    connection.removeListener('error', connErrCb);
 
                     connection.on( 'voice', (data) => this._onVoice(data) );
                     connection.on( `message`, (message, user, scope) => this._onMessage(message, user, scope));
