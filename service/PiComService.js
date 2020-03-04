@@ -94,7 +94,7 @@ class PiComService{
             await this.mumble.connect();
         }
         catch (err) {
-            log.error('PiCom Mumble Connection - Mumble was not able to be connected. Check configuration and try again', err);
+            log.error('PiCom Mumble Connection - Mumble was not able to connect. Check configuration and try again', err);
             return;
             //Swallow Error
         }
@@ -118,8 +118,10 @@ class PiComService{
     }
 
     async _disconnectMumble(){
-        await this.mumble.disconnect();
-        this._disconnectAudio();
+        if(this.mumble.status.connected)
+            await this.mumble.disconnect();
+        if(this._audioStatus === AUDIO_CONFIGURED || this._audioStatus === AUDIO_SETUP_ERROR)
+            this._disconnectAudio();
     }
   
     unLatchMic(){
