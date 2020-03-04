@@ -117,8 +117,8 @@ class PiComService{
     }
 
     async _disconnectMumble(){
-        this._audioStatus = AUDIO_NOT_SETUP;
         await this.mumble.disconnect();
+        this._disconnectAudio();
     }
   
     unLatchMic(){
@@ -161,6 +161,11 @@ class PiComService{
         }
 
         this._audioStatus = AUDIO_CONFIGURED;
+    }
+
+    _disconnectAudio(){
+        this._audioStatus = AUDIO_NOT_SETUP;
+        this.speaker.close();
     }
 
     _setupMic(){
