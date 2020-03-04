@@ -7,10 +7,7 @@ const {copyExistingCertConfigToNewConfig} = require("../domain/config");
 const {isMumbleConfigFileValid, parseMumbleConfig, writeMumbleConfig} = require("../domain/config");
 
 function getStatus(req){
-    return {
-        status: req.piCom.state,
-        mumbleReady: req.piCom.mumble.connection.ready,
-    }
+    return req.piCom.status;
 }
 
 controller.helloWorldRoute = function (req, res) {
