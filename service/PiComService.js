@@ -126,7 +126,7 @@ class PiComService{
         }
     }
     _setupAudio(){
-        if(process.env.DEBUG_DISABLE_AUDIO_HARDWARE !== "TRUE") {
+        if(process.env.DEBUG_DISABLE_AUDIO_HARDWARE === "TRUE") {
             log.warn(`Hardware Audio Disabled. DEBUG_DISABLE_AUDIO_HARDWARE is set`);
             return;
         }
