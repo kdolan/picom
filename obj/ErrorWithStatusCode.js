@@ -1,5 +1,5 @@
 class ErrorWithStatusCode extends Error {
-    constructor({code = 500, message="Error"},...params) {
+    constructor({code = 500, message="Error", innerError},...params) {
         // Pass remaining arguments (including vendor specific ones) to parent constructor
         super(...params);
 
@@ -12,6 +12,7 @@ class ErrorWithStatusCode extends Error {
         this.code = code;
         this.message = message;
         this.date = new Date();
+        this.innerError = innerError ? innerError : null;
     }
 }
 

@@ -12,6 +12,23 @@ class HardwareService extends EventEmitter{
         this.txButtonPin = txButtonPin;
         this.callLedPin = callLedPin;
         this.talkLedPin = talkLedPin;
+
+        this._setupDone = false;
+        this._errorFlasherEnabled = false;
+        this._errorFlasherInterval = null;
+
+
+        this._leds = {
+            callLedOn: false,
+            talkLedOn: false
+        }
+    }
+
+    get status(){
+        return {
+            setupDone: this._setupDone,
+            led: this._leds
+        }
     }
 
     setup(){
@@ -19,6 +36,37 @@ class HardwareService extends EventEmitter{
         this._setupTalkLed();
         this._setupTxButton();
         this._setupCallButton();
+        this._setupDone = true;
+    }
+
+    setCallLed(state){
+        this._leds.callLedOn = !!state;
+        if(state)
+            this.callLed.digitalWrite(1);
+        else
+            this.callLed.digitalWrite(0);
+    }
+
+    setTalkLed(state){
+        this._leds.talkLedOn = !!state;
+        if(state)
+            this.talkLed.digitalWrite(1);
+        else
+            this.talkLed.digitalWrite(0);
+    }
+
+    setErrorFlasher(enabled){
+        if(!this._errorFlasherEnabled && enabled) {
+            this._errorFlasherEnabled = true;
+            this._errorFlasherInterval = setInterval(() => this._errorFlasherCallback(), 250);
+        }
+        else if(this._errorFlasherEnabled && !enabled){
+            this._errorFlasherEnabled = false;
+            clearInterval(this._errorFlasherInterval);
+            this.setCallLed(false);
+            this.setTalkLed(false);
+        }
+
     }
 
     _setupButton({pin, eventName}){
@@ -67,18 +115,15 @@ class HardwareService extends EventEmitter{
         log.debug('Talk LED setup on ' + this.talkLedPin);
     }
 
-    setCallLed(state){
-        if(state)
-            this.callLed.digitalWrite(1);
-        else
-            this.callLed.digitalWrite(0);
-    }
-
-    setTalkLed(state){
-        if(state)
-            this.talkLed.digitalWrite(1);
-        else
-            this.talkLed.digitalWrite(0);
+    _errorFlasherCallback(){
+        if(this.status.led.callLedOn){
+            this.setCallLed(false);
+            this.setTalkLed(true);
+        }
+        else{
+            this.setCallLed(true);
+            this.setTalkLed(false);
+        }
     }
 }
 

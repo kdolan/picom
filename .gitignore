@@ -3,6 +3,8 @@ cert/
 # Local Config Files
 *local.json
 
+.idea/*
+
 # Logs
 logs
 *.log

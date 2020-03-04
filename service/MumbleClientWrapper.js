@@ -9,6 +9,9 @@ class MumbleClientWrapper extends EventEmitter{
     constructor({server, port, username, key, cert}) {
         super();
 
+        this._connected = false;
+        this._connectCalled = false;
+
         this.config = {
             server,
             options: {
@@ -20,24 +23,43 @@ class MumbleClientWrapper extends EventEmitter{
         }
     }
 
+    get status(){
+        return {
+            connected: this._connected,
+            connectionAttempted: this._connectCalled
+        };
+    }
+
     async connect(){
+        this._connectCalled = true;
         return new Promise((resolve, reject) => {
             log.info( `Connecting to ${this.config.server}` );
 
             mumble.connect( this.config.server, this.config.options,  ( error, connection ) => {
                 if( error )
-                    return reject(new Error( error ? error : "Unknown Connection Error"));
+                    return reject(new ErrorWithStatusCode( {code: 500, message: "Mumble Connection Error", innerError: error}));
 
                 log.info( `Connected to ${this.config.server}. Waiting for connection to be ready...` );
                 this.connection = connection;
 
                 connection.authenticate( this.config.username, null );
 
+                connection.on('error', (err) => {
+                    log.error( `Mumble Connection Failed - Error Establishing Mumble Connection`, err );
+                    reject(new ErrorWithStatusCode( {code: 500, message: "Mumble Connection Error", innerError: error}));
+                });
+
                 connection.on( 'initialized', () => {
                     log.info( `Connection to ${this.config.server} is ready to use` );
 
+                    //Remove the local error listener above
+                    connection.removeAllListener('error');
+
                     connection.on( 'voice', (data) => this._onVoice(data) );
                     connection.on( `message`, (message, user, scope) => this._onMessage(message, user, scope));
+                    connection.on('error', error => this._onError(error));
+
+                    this._connected = true;
 
                     resolve();
                 } );
@@ -46,6 +68,7 @@ class MumbleClientWrapper extends EventEmitter{
     }
 
     async disconnect(){
+        this._connected = false;
         log.info( `Disconnecting from ${this.config.server}` );
         this.connection.disconnect();
     }
@@ -93,6 +116,11 @@ class MumbleClientWrapper extends EventEmitter{
             sampleRate: 48000
         });
         readableStream.pipe(stream)
+    }
+
+    _onError(error){
+        log.error(`Mumble Error - Connection Has Terminated Due to Error`, error);
+        this.emit('error', new ErrorWithStatusCode({code: 500, innerError: error, message: "Mumble connection has terminated due to an error. Re-connect needed"}));
     }
 
     _onMessage(message, user, scope){

@@ -9,6 +9,14 @@ const UP = "UP";
 const DOWN = "DOWN";
 const LATCH_TIME_MS=500;
 
+const AUDIO_NOT_SETUP = "NOT_CONFIGURED";
+const AUDIO_SETUP_ERROR = "AUDIO_SETUP_ERROR";
+const AUDIO_CONFIGURED = "CONFIGURED_SUCCESSFULLY";
+
+const STATUS_NORMAL = "NORMAL";
+const STATUS_WARN = "WARNING";
+const STATUS_ERROR = "ERROR";
+
 class PiComService{
     constructor({mumbleConfig, hardwareConfig}) {
         this.mumble = new MumbleClientWrapper(mumbleConfig);
@@ -25,11 +33,52 @@ class PiComService{
 
         this._txTimes = [];
         this._stopTxTimes = [];
+
+        this._audioStatus = AUDIO_NOT_SETUP;
+
+        this._healthCheckInterval = setInterval(() => this._healthCheckCallback(), 1000);
+    }
+
+    get status(){
+        return {
+            piCom: this.state,
+            mumble: this.mumble.status,
+            hardware: this.hardware.status,
+            audio: this._audioStatus,
+            global: this._errorState
+        }
+    }
+
+    get _errorState(){
+        const messages = [];
+        if(this._audioStatus === AUDIO_NOT_SETUP)
+            messages.push({message: `${STATUS_WARN} - Audio Not Setup`, status: STATUS_WARN});
+        if(this._audioStatus === AUDIO_SETUP_ERROR)
+            messages.push({message: `${STATUS_ERROR} - Audio Error`, status: STATUS_ERROR});
+
+        if(!this.hardware.status.setupDone)
+            messages.push({message: `${STATUS_WARN} - Hardware Not Setup`, status: STATUS_WARN});
+
+        if(!this.mumble.status.connected) {
+            if(this.mumble.status.connectionAttempted)
+                messages.push({message: `${STATUS_ERROR} - Mumble Not Connected`, status: STATUS_ERROR});
+            else
+                messages.push({message: `${STATUS_WARN} - Mumble Connection Not Attempted`, status: STATUS_WARN});
+        }
+
+        let warnLevel = messages.filter(m => m.status === STATUS_WARN).length > 0;
+        let errorLevel = messages.filter(m => m.status === STATUS_ERROR).length > 0;
+        if(errorLevel)
+            return {status: STATUS_ERROR, messages};
+        if(warnLevel)
+            return {status: STATUS_WARN, messages};
+        return {status: STATUS_NORMAL, messages};
+
     }
 
     async reconfigureMumbleAndReconnect(newConfig){
         this.mumbleConfig = newConfig;
-        await this.mumble.disconnect();
+        await this._disconnectMumble();
         this.mumble = new MumbleClientWrapper(newConfig);
         await this._connectMumble();
     }
@@ -52,10 +101,17 @@ class PiComService{
             catch (err) {
                 if(err.code === 404)
                     log.warn(`The Default Channel '${this.mumbleConfig.defaultChannelName}' does not exist. Client will stay in root channel`);
-                else
+                else {
+                    log.error(`Error Joining Default Channel`);
                     throw err;
+                }
             }
         }
+    }
+
+    async _disconnectMumble(){
+        this._audioStatus = AUDIO_NOT_SETUP;
+        await this.mumble.disconnect();
     }
   
     unLatchMic(){
@@ -92,9 +148,12 @@ class PiComService{
                 log.warn(`Audio Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`);
                 return;
             }
+            this._audioStatus = AUDIO_SETUP_ERROR;
             log.error(`Audio Setup Failed. Error`, e);
             throw e;
         }
+
+        this._audioStatus = AUDIO_CONFIGURED;
     }
 
     _setupMic(){
@@ -190,6 +249,11 @@ class PiComService{
                 log.debug(`Not Latching: First Hold ${firstHoldDuration}, Second Hold: ${secondHoldDuration}, Tx Interval: ${timeBetweenTxEvents}`);
         }
         this.state.micLatch = false;
+    }
+
+    _healthCheckCallback(){
+        const status = this.status;
+        this.hardware.setErrorFlasher(status.global.status === STATUS_ERROR);
     }
 }
 
