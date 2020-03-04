@@ -167,6 +167,7 @@ class PiComService{
     _disconnectAudio(){
         this._audioStatus = AUDIO_NOT_SETUP;
         this.speaker.close();
+        this.mic.stop();
     }
 
     _setupMic(){
