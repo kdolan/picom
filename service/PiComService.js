@@ -90,7 +90,14 @@ class PiComService{
     }
 
     async _connectMumble(){
-        await this.mumble.connect();
+        try {
+            await this.mumble.connect();
+        }
+        catch (err) {
+            log.error('PiCom Mumble Connection - Mumble was not able to be connected. Check configuration and try again', err);
+            //Swallow Error
+        }
+
         //Audio always needs to be configured after the mumble client is connected
         this._setupAudio();
         //If Default Channel Set Join it
@@ -102,8 +109,8 @@ class PiComService{
                 if(err.code === 404)
                     log.warn(`The Default Channel '${this.mumbleConfig.defaultChannelName}' does not exist. Client will stay in root channel`);
                 else {
-                    log.error(`Error Joining Default Channel`);
-                    throw err;
+                    log.error(`Error Joining Default Channel. Client will stay in root channel`);
+                    //Swallowing Error
                 }
             }
         }
