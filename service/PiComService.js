@@ -95,6 +95,7 @@ class PiComService{
         }
         catch (err) {
             log.error('PiCom Mumble Connection - Mumble was not able to be connected. Check configuration and try again', err);
+            return;
             //Swallow Error
         }
 
