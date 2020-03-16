@@ -1,26 +1,23 @@
 const {HardwareService} = require("./HardwareService");
 const {MumbleClientWrapper} = require("./MumbleClientWrapper");
-const Speaker = require('./Speaker');
-const Mic = require('mic');
 const log = require('loglevel');
+const {AudioService} = require("./AudioService");
 const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
 
 const UP = "UP";
 const DOWN = "DOWN";
 const LATCH_TIME_MS=500;
 
-const AUDIO_NOT_SETUP = "NOT_CONFIGURED";
-const AUDIO_SETUP_ERROR = "AUDIO_SETUP_ERROR";
-const AUDIO_CONFIGURED = "CONFIGURED_SUCCESSFULLY";
+const {AUDIO, STATUS} = require('../domain/status.constants');
+const {STATUS_NORMAL, STATUS_WARN, STATUS_ERROR} = {...STATUS};
+const {AUDIO_NOT_SETUP, AUDIO_SETUP_ERROR, AUDIO_CONFIGURED} = {...AUDIO};
 
-const STATUS_NORMAL = "NORMAL";
-const STATUS_WARN = "WARNING";
-const STATUS_ERROR = "ERROR";
 
 class PiComService{
     constructor({mumbleConfig, hardwareConfig}) {
         this.mumble = new MumbleClientWrapper(mumbleConfig);
         this.hardware = new HardwareService(hardwareConfig);
+        this.audio = new AudioService({piCom: this});
 
         this.mumbleConfig = mumbleConfig;
         this.hardwareConfig = hardwareConfig;
@@ -51,9 +48,9 @@ class PiComService{
 
     get _errorState(){
         const messages = [];
-        if(this._audioStatus === AUDIO_NOT_SETUP)
+        if(this.audio.status === AUDIO_NOT_SETUP)
             messages.push({message: `${STATUS_WARN} - Audio Not Setup`, status: STATUS_WARN});
-        if(this._audioStatus === AUDIO_SETUP_ERROR)
+        if(this.audio.status === AUDIO_SETUP_ERROR)
             messages.push({message: `${STATUS_ERROR} - Audio Error`, status: STATUS_ERROR});
 
         if(!this.hardware.status.setupDone)
@@ -100,7 +97,7 @@ class PiComService{
         }
 
         //Audio always needs to be configured after the mumble client is connected
-        this._setupAudio();
+        this.audio.setupAudio();
         //If Default Channel Set Join it
         if(this.mumbleConfig.defaultChannelName) {
             try {
@@ -120,8 +117,8 @@ class PiComService{
     async _disconnectMumble(){
         if(this.mumble.status.connected)
             await this.mumble.disconnect();
-        if(this._audioStatus === AUDIO_CONFIGURED || this._audioStatus === AUDIO_SETUP_ERROR)
-            this._disconnectAudio();
+        if(this.audio.status === AUDIO_CONFIGURED || this.audio.status === AUDIO_SETUP_ERROR)
+            this.audio.disconnectAudio();
     }
   
     unLatchMic(){
@@ -133,82 +130,6 @@ class PiComService{
             const message = `Cannot unlatch. Mic not latched`;
             log.error(message);
             throw new ErrorWithStatusCode({code: 400, message});
-        }
-    }
-    _setupAudio(){
-        if(process.env.DEBUG_DISABLE_AUDIO_HARDWARE === "TRUE") {
-            log.warn(`Hardware Audio Disabled. DEBUG_DISABLE_AUDIO_HARDWARE is set`);
-            return;
-        }
-
-        try {
-            this._setupMic();
-
-            this.speaker = new Speaker({
-                channels: 1,
-                bitDepth: 16,
-                device: "plughw:1,0"
-            });
-
-            const outputStream = this.mumble.connection.outputStream(undefined, true);
-            outputStream.pipe(this.speaker);
-        }
-        catch (e) {
-            if(process.env.DEBUG_IGNORE_AUDIO_ERRORS === "TRUE"){
-                log.warn(`Audio Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`);
-                return;
-            }
-            this._audioStatus = AUDIO_SETUP_ERROR;
-            log.error(`Audio Setup Failed. Error`, e);
-            throw e;
-        }
-
-        this._audioStatus = AUDIO_CONFIGURED;
-    }
-
-    _disconnectAudio(){
-        this._audioStatus = AUDIO_NOT_SETUP;
-        this.speaker.close();
-        this.mic.stop();
-    }
-
-    _setupMic(){
-        try {
-            this.mic = Mic({
-                rate: '88000',
-                channels: '1',
-                debug: true,
-                device: "hw:CARD=Device,DEV=0",
-                exitOnSilence: 0
-            });
-
-            const micInputStream = this.mic.getAudioStream();
-            let mumbleWriteStream = this.mumble.connection.inputStream();
-            micInputStream.pipe(mumbleWriteStream);
-
-            micInputStream.on('data', function (data) {
-                log.debug("Mic Input Stream Data: " + data.length);
-            });
-
-            micInputStream.on('error', function (err) {
-                log.error("Error in Mic Input Stream: " + err);
-            });
-
-            micInputStream.on('processExitComplete', function () {
-                log.warn("Got SIGNAL processExitComplete");
-            });
-
-            //Start the mic stream but pause it immediately since it is not transmitting
-            this.mic.start();
-            this.mic.pause();
-        }
-        catch (e) {
-            if(process.env.DEBUG_IGNORE_AUDIO_ERRORS === "TRUE"){
-                log.warn(`Mic Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`);
-                return;
-            }
-            log.error(`Mic Setup Failed. Error`, e);
-            throw e;
         }
     }
 
