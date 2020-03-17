@@ -34,10 +34,11 @@ class AudioService{
             });
 
             const mumbleOutputStream = this._piCom.mumble.connection.outputStream(undefined, true);
+            this.mumbleOutputStream.pipe(this.speaker);
             //Connect the mumble audio to the mumble input on the mixer
             this.mergeStream = merge2(mumbleOutputStream);
             //Connect the mixer output to the speaker
-            this.mergeStream.pipe(this.speaker);
+            //this.mergeStream.pipe(this.speaker);
         }
         catch (e) {
             if(_ignoreAudioErrors(`Audio Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`))
