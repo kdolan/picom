@@ -2,8 +2,7 @@ const Speaker = require('./Speaker');
 const Mic = require('mic');
 const log = require('loglevel');
 const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
-const tone = require('tonegenerator');
-const streamify = require('stream-array');
+const generateTone = require('../util/sin.pcm').generateTone;
 
 const {AUDIO} = require('../domain/status.constants');
 const {AUDIO_NOT_SETUP, AUDIO_SETUP_ERROR, AUDIO_CONFIGURED} = {...AUDIO};
@@ -63,15 +62,7 @@ class AudioService{
             throw new ErrorWithStatusCode({code: 500, message });
         }
 
-       const toneData = tone({
-           freq: freqHz,
-           lengthInSecs: durationMs * 1000,
-           volume: 30,
-           rate: 88000,
-           shape: 'sine'
-       });
-
-        streamify(toneData).pipe(this.speaker);
+        generateTone({freq: freqHz, durationSec: durationMs * 1000}).pipe(this.speaker);
     }
 
     _setupMic(){
