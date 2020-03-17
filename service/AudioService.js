@@ -2,6 +2,8 @@ const Speaker = require('./Speaker');
 const Mic = require('mic');
 const log = require('loglevel');
 const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
+const tone = require('tonegenerator');
+const streamify = require('stream-array');
 
 const {AUDIO} = require('../domain/status.constants');
 const {AUDIO_NOT_SETUP, AUDIO_SETUP_ERROR, AUDIO_CONFIGURED} = {...AUDIO};
@@ -35,22 +37,41 @@ class AudioService{
             outputStream.pipe(this.speaker);
         }
         catch (e) {
-            if(process.env.DEBUG_IGNORE_AUDIO_ERRORS === "TRUE"){
-                log.warn(`Audio Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`);
+            if(_ignoreAudioErrors(`Audio Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`))
                 return;
-            }
             this._audioStatus = AUDIO_SETUP_ERROR;
             log.error(`Audio Setup Failed. Error`, e);
             throw e;
         }
 
         this._audioStatus = AUDIO_CONFIGURED;
+        //Play test beep
+        this.playBeep();
     }
 
     disconnectAudio(){
         this._audioStatus = AUDIO_NOT_SETUP;
         this.speaker.close();
         this.mic.stop();
+    }
+
+    playBeep({durationMs=200, freqHz=440}={}){
+        if(this._audioStatus !== AUDIO_CONFIGURED) {
+            const message = "Cannot play beep. Audio is not configured";
+            if(_ignoreAudioErrors(`${message}. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`))
+                return;
+            throw new ErrorWithStatusCode({code: 500, message });
+        }
+
+       const toneData = tone({
+           freq: freqHz,
+           lengthInSecs: durationMs * 1000,
+           volume: 30,
+           rate: 88000,
+           shape: 'sine'
+       });
+
+        streamify(toneData).pipe(this.speaker);
     }
 
     _setupMic(){
@@ -91,6 +112,13 @@ class AudioService{
             log.error(`Mic Setup Failed. Error`, e);
             throw e;
         }
+    }
+}
+
+function _ignoreAudioErrors(warnMessage){
+    if(process.env.DEBUG_IGNORE_AUDIO_ERRORS === "TRUE"){
+        log.warn(warnMessage);
+        return true;
     }
 }
 
