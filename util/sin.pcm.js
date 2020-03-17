@@ -43,7 +43,7 @@ function _generateReadFunction({freq, durationSec}) {
         this.samplesGenerated += numSamples;
         if (this.samplesGenerated >= this.sampleRate * durationSec) {
             // after generating "duration" second of audio, emit "end"
-            this.push(null);
+            //this.push(null);
         }
     };
     return read;

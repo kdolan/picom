@@ -26,9 +26,14 @@ class AudioService{
         try {
             this._setupMic();
 
-            this._mumbleSpeaker = this._getNewSpeakerInstance();
+            this.speaker = new Speaker({
+                channels: 1,
+                bitDepth: 16,
+                device: "plughw:1,0"
+            });
+
             const outputStream = this._piCom.mumble.connection.outputStream(undefined, true);
-            outputStream.pipe(this._mumbleSpeaker);
+            outputStream.pipe(this.speaker);
         }
         catch (e) {
             if(_ignoreAudioErrors(`Audio Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`))
@@ -44,17 +49,9 @@ class AudioService{
         setTimeout( () => this.playBeep({durationMs: 150, freqHz: 440*2}), 50);
     }
 
-    _getNewSpeakerInstance(){
-        return new Speaker({
-            channels: 1,
-            bitDepth: 16,
-            device: "plughw:1,0"
-        });
-    }
-
     disconnectAudio(){
         this._audioStatus = AUDIO_NOT_SETUP;
-        this._mumbleSpeaker.close();
+        this.speaker.close();
         this.mic.stop();
     }
 
@@ -66,8 +63,7 @@ class AudioService{
             throw new ErrorWithStatusCode({code: 500, message });
         }
 
-        //Generate the tone and send to new speaker instance. After tone is written speaker instance will close
-        generateTone({freq: freqHz, durationSec: durationMs / 1000}).pipe(this._getNewSpeakerInstance());
+        generateTone({freq: freqHz, durationSec: durationMs / 1000}).pipe(this.speaker);
     }
 
     _setupMic(){
