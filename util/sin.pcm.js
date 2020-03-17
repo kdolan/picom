@@ -45,7 +45,8 @@ function _generateReadFunction({freq, durationSec}) {
             // after generating "duration" second of audio, emit "end"
             this.push(null);
         }
-    }
+    };
+    return read;
 }
 
 module.exports.generateTone = generateTone;
