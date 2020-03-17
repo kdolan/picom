@@ -62,7 +62,7 @@ class AudioService{
             throw new ErrorWithStatusCode({code: 500, message });
         }
 
-        generateTone({freq: freqHz, durationSec: durationMs * 1000}).pipe(this.speaker);
+        generateTone({freq: freqHz, durationSec: durationMs / 1000}).pipe(this.speaker);
     }
 
     _setupMic(){

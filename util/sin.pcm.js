@@ -7,7 +7,7 @@ function generateTone({freq=440.0, durationSec=1}) {
     // A SineWaveGenerator readable stream
     const sine = new Readable();
     sine.bitDepth = 16;
-    sine.channels = 2;
+    sine.channels = 1;
     sine.sampleRate = 44100;
     sine.samplesGenerated = 0;
     sine._read = _generateReadFunction({freq, durationSec});
