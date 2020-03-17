@@ -3,6 +3,7 @@ const Mic = require('mic');
 const log = require('loglevel');
 const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
 const generateTone = require('../util/sin.pcm').generateTone;
+const CombinedStream = require('combined-stream');
 
 const {AUDIO} = require('../domain/status.constants');
 const {AUDIO_NOT_SETUP, AUDIO_SETUP_ERROR, AUDIO_CONFIGURED} = {...AUDIO};
@@ -31,9 +32,13 @@ class AudioService{
                 bitDepth: 16,
                 device: "plughw:1,0"
             });
+            this.speakerInputCombinedStream = CombinedStream.create();
 
-            const outputStream = this._piCom.mumble.connection.outputStream(undefined, true);
-            outputStream.pipe(this.speaker);
+            const mumbleOutputStream = this._piCom.mumble.connection.outputStream(undefined, true);
+            //Connect the mumble audio as an input to the speaker
+            this.speakerInputCombinedStream.append(mumbleOutputStream);
+            //Connect the speaker mix to the speaker
+            this.speakerInputCombinedStream.pipe(this.speaker);
         }
         catch (e) {
             if(_ignoreAudioErrors(`Audio Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`))
@@ -62,8 +67,7 @@ class AudioService{
                 return;
             throw new ErrorWithStatusCode({code: 500, message });
         }
-
-        generateTone({freq: freqHz, durationSec: durationMs / 1000}).pipe(this.speaker);
+        this.speakerInputCombinedStream.append( generateTone({freq: freqHz, durationSec: durationMs / 1000}));
     }
 
     _setupMic(){
