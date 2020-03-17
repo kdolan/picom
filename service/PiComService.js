@@ -157,7 +157,7 @@ class PiComService{
             this.state.micLatch = false;
             this._latchLogic(); //Determines if the mic should be latched by setting state.micLatch
             if(!this.state.micLatch) {
-                this.mic.pause();
+                this.audio.mic.pause();
                 this.state.transmitting = false;
                 this.hardware.setTalkLed(false);
             }
