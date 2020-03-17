@@ -14,3 +14,7 @@
 4. run `./scripts/gen-cert.sh`
 5. Copy `.env.template` to `.env` and configure as desired
 6. run `npm start`
+
+## Troubleshooting
+### Error: Could not locate the bindings file
+  Something is wrong with the installed node_modules. Run `rm -R node_modules && npm i` to rebuid the node_modules
