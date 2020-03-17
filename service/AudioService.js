@@ -3,7 +3,7 @@ const Mic = require('mic');
 const log = require('loglevel');
 const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
 const generateTone = require('../util/sin.pcm').generateTone;
-const CombinedStream = require('combined-stream');
+const AudioMixer = require('audio-mixer');
 
 const {AUDIO} = require('../domain/status.constants');
 const {AUDIO_NOT_SETUP, AUDIO_SETUP_ERROR, AUDIO_CONFIGURED} = {...AUDIO};
@@ -32,13 +32,24 @@ class AudioService{
                 bitDepth: 16,
                 device: "plughw:1,0"
             });
-            this.speakerInputCombinedStream = CombinedStream.create({pauseStream: false});
+
+            this.mixer = new AudioMixer.Mixer({
+                channels: 1,
+                bitDepth: 16,
+                sampleRate: 88000,
+                clearInterval: 250
+            });
+
+            let mumbleInput = this.mixer.input({
+                channels: 1,
+                volume: 100
+            });
 
             const mumbleOutputStream = this._piCom.mumble.connection.outputStream(undefined, true);
-            //Connect the mumble audio as an input to the speaker
-            this.speakerInputCombinedStream.append(mumbleOutputStream);
-            //Connect the speaker mix to the speaker
-            this.speakerInputCombinedStream.pipe(this.speaker);
+            //Connect the mumble audio to the mumble input on the mixer
+            mumbleOutputStream.pipe(mumbleInput);
+            //Connect the mixer output to the speaker
+            this.mixer.pipe(this.speaker);
         }
         catch (e) {
             if(_ignoreAudioErrors(`Audio Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`))
@@ -67,7 +78,13 @@ class AudioService{
                 return;
             throw new ErrorWithStatusCode({code: 500, message });
         }
-        this.speakerInputCombinedStream.append( generateTone({freq: freqHz, durationSec: durationMs / 1000}));
+
+        let beepInput = this.mixer.input({
+            channels: 1,
+            volume: 100
+        });
+
+        generateTone({freq: freqHz, durationSec: durationMs / 1000}).pipe(beepInput);
     }
 
     _setupMic(){
