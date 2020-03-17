@@ -32,7 +32,7 @@ class AudioService{
                 bitDepth: 16,
                 device: "plughw:1,0"
             });
-            this.speakerInputCombinedStream = CombinedStream.create();
+            this.speakerInputCombinedStream = CombinedStream.create({pauseStream: false});
 
             const mumbleOutputStream = this._piCom.mumble.connection.outputStream(undefined, true);
             //Connect the mumble audio as an input to the speaker
