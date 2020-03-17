@@ -67,7 +67,7 @@ class AudioService{
             throw new ErrorWithStatusCode({code: 500, message });
         }
 
-        this.mergeStream(generateTone({freq: freqHz, durationSec: durationMs / 1000}));
+        this.mergeStream.add(generateTone({freq: freqHz, durationSec: durationMs / 1000}));
     }
 
     _setupMic(){
