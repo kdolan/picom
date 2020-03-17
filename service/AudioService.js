@@ -44,8 +44,9 @@ class AudioService{
         }
 
         this._audioStatus = AUDIO_CONFIGURED;
-        //Play test beep
-        this.playBeep();
+        //Play test beeps
+        this.playBeep({durationMs: 50, freqHz: 440});
+        setTimeout( () => this.playBeep({durationMs: 150, freqHz: 440*2}), 50);
     }
 
     disconnectAudio(){
