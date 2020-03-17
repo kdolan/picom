@@ -67,10 +67,6 @@ class AudioService{
             throw new ErrorWithStatusCode({code: 500, message });
         }
 
-        let beepInput = this.mixer.input({
-            channels: 1,
-            volume: 100
-        });
         this.mergeStream(generateTone({freq: freqHz, durationSec: durationMs / 1000}));
     }
 
