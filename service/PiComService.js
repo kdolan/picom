@@ -143,7 +143,7 @@ class PiComService{
 
     _txEvent(state){
         if(state === DOWN) {
-            this.mic.resume();
+            this.audio.mic.resume();
             this._txTimes.unshift(new Date());
             this._txTimes = this._txTimes.slice(0,2);
 
