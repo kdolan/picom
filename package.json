@@ -2,10 +2,10 @@
   "name": "effective-winner-mumble",
   "version": "1.0.0",
   "description": "",
-  "main": "bin/scream-demo.js",
+  "main": " bin/www.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node bin/scream-demo.js",
+    "start": "node bin/www.js",
     "pi-i": "npm i pigpio speaker",
     "pi-demo": "node bin/gpio-scream-demo.js"
   },
