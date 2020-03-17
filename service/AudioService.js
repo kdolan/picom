@@ -35,7 +35,7 @@ class AudioService{
 
             const mumbleOutputStream = this._piCom.mumble.connection.outputStream(undefined, true);
             //Connect the mumble audio to the mumble input on the mixer
-            this.mergeStream = merge2(mumbleOutputStream, {end: false});
+            this.mergeStream = merge2(mumbleOutputStream);
             //Connect the mixer output to the speaker
             this.mergeStream.pipe(this.speaker);
         }
