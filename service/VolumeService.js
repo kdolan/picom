@@ -41,15 +41,15 @@ class VolumeService{
         this._audioChanged(result);    }
 
     async mute(){
-        const result = await _setVolume(0);
+        const result = await _setVolume(MIN);
         this._audioChanged(result);    }
 
     async setMaxVolume(){
-        const result = await _setVolume(100);
+        const result = await _setVolume(MAX);
         this._audioChanged(result);    }
 
     async setNominalVolume(){
-        const result = await _setVolume(50);
+        const result = await _setVolume((MAX/2).toFixed(0));
         this._audioChanged(result);    }
 
     _audioChanged({leftVol, rightVol}){
@@ -60,11 +60,11 @@ class VolumeService{
     }
 }
 
-async function _setVolume(percentage){
-    const num = Number(percentage);
+async function _setVolume(rawValue){
+    const num = Number(rawValue);
     if(isNaN(num)) //Driver handles values outside range 0-100
-        throw new ErrorWithStatusCode({code: 400, message: `The provided percentage ${percentage} is invalid.`});
-    return _execVolumePromise(`amixer -c 1 cset numid=6 ${num}%`);
+        throw new ErrorWithStatusCode({code: 400, message: `The provided rawValue ${rawValue} is invalid.`});
+    return _execVolumePromise(`amixer -c 1 cset numid=6 ${num}`);
 }
 
 async function _execVolumePromise(command){
