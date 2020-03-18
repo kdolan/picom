@@ -1,5 +1,6 @@
 const Speaker = require('./Speaker');
 const Mic = require('mic');
+const VolumeService = require('./VolumeService').VolumeService;
 const log = require('loglevel');
 const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
 const generateTone = require('../util/sin.pcm').generateTone;
@@ -12,10 +13,14 @@ class AudioService{
     constructor({piCom}){
         this._piCom = piCom;
         this._audioStatus = AUDIO_NOT_SETUP;
+        this.volume = null;
     }
 
     get status(){
-        return this._audioStatus;
+        return {
+            state: this._audioStatus,
+            volume: this.volume ? this.volume.status : null
+        };
     }
 
     setupAudio(){
@@ -23,6 +28,11 @@ class AudioService{
             log.warn(`Hardware Audio Disabled. DEBUG_DISABLE_AUDIO_HARDWARE is set`);
             return;
         }
+        //Init volume service
+        this.volume = new VolumeService({volumeSetCb: () => this.playBeep({freqHz: 440, durationMs: 50})});
+
+        if(process.env.AUDIO_SET_VOLUME_NOMINAL_ON_CONFIGURED === "TRUE")
+            this.volume.setNominalVolume().catch(e => log.error(`Failed to Set Nominal Volume During Audio Configuration`));
 
         try {
             this._setupMic();
@@ -50,14 +60,18 @@ class AudioService{
 
         this._audioStatus = AUDIO_CONFIGURED;
         //Play test beeps
-        this.playBeep({durationMs: 50, freqHz: 440});
-        setTimeout( () => this.playBeep({durationMs: 150, freqHz: 440*2}), 50);
+        this.playDoubleBeep();
     }
 
     disconnectAudio(){
         this._audioStatus = AUDIO_NOT_SETUP;
         this.speaker.close();
         this.mic.stop();
+    }
+
+    playDoubleBeep({firstFreq=440, firstDurMs=50, secondFreq=880, secondDurMs=150}={}){
+        this.playBeep({durationMs: firstDurMs, freqHz: firstFreq});
+        setTimeout( () => this.playBeep({durationMs: secondDurMs, freqHz: secondFreq}), firstDurMs);
     }
 
     playBeep({durationMs=200, freqHz=440}={}){

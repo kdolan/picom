@@ -36,6 +36,14 @@
                 </div>
                 <button type="button" class="btn btn-primary" onclick="save()">Save and Reconnect</button>
             </form>
+            <h1>Volume Admin</h1>
+            <form>
+                <button type="button" class="btn btn-outline-danger" onclick="volumeAction('mute')">Mute</button>
+                <button type="button" class="btn btn-primary" onclick="volumeAction('nominal')">Nominal (50%)</button>
+                <button type="button" class="btn btn-warning" onclick="volumeAction('max')">Max (100%)</button>
+                <button type="button" class="btn btn-outline-primary outline" onclick="volumeAction('increase')">Increase</button>
+                <button type="button" class="btn btn-outline-primary outline" onclick="volumeAction('decease')">Decrease</button>
+            </form>
         </div>
     </div>
 </div>
@@ -53,6 +61,21 @@
             },
             success: function(result) {
                 alert("Reconfigured and mumble reconnected");
+            },
+            error: function (result) {
+                alert("Error - Check Log");
+            }
+        });
+    }
+
+    function volumeAction(action){
+        $.ajax({
+            url: '/v1/volume/' + action,
+            type: 'POST',
+            data: {
+            },
+            success: function(result) {
+                alert("Volume Set");
             },
             error: function (result) {
                 alert("Error - Check Log");

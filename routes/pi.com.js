@@ -11,5 +11,12 @@ module.exports = function() {
 
     router.post('/mumble/configure', controller.reconfigureMumbleRoute);
 
+    //TODO? - Maybe combine these to a single endpoint?
+    router.post('/volume/mute', controller.muteVolumeRoute);
+    router.post('/volume/nominal', controller.setNominalVolumeRoute);
+    router.post('/volume/max', controller.setMaxVolumeRoute);
+    router.post('/volume/increase', controller.increaseVolumeRoute);
+    router.post('/volume/decrease', controller.decreaseVolumeRoute);
+
     return router;
 };

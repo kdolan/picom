@@ -31,8 +31,6 @@ class PiComService{
         this._txTimes = [];
         this._stopTxTimes = [];
 
-        this._audioStatus = AUDIO_NOT_SETUP;
-
         this._healthCheckInterval = setInterval(() => this._healthCheckCallback(), 1000);
     }
 
@@ -41,16 +39,17 @@ class PiComService{
             piCom: this.state,
             mumble: this.mumble.status,
             hardware: this.hardware.status,
-            audio: this._audioStatus,
+            audio: this.audio.status,
             global: this._errorState
         }
     }
 
     get _errorState(){
         const messages = [];
-        if(this.audio.status === AUDIO_NOT_SETUP)
+        const audioState = this.audio.status.state;
+        if(audioState === AUDIO_NOT_SETUP)
             messages.push({message: `${STATUS_WARN} - Audio Not Setup`, status: STATUS_WARN});
-        if(this.audio.status === AUDIO_SETUP_ERROR)
+        if(audioState === AUDIO_SETUP_ERROR)
             messages.push({message: `${STATUS_ERROR} - Audio Error`, status: STATUS_ERROR});
 
         if(!this.hardware.status.setupDone)
@@ -117,7 +116,9 @@ class PiComService{
     async _disconnectMumble(){
         if(this.mumble.status.connected)
             await this.mumble.disconnect();
-        if(this.audio.status === AUDIO_CONFIGURED || this.audio.status === AUDIO_SETUP_ERROR)
+
+        const audioState = this.audio.status.state;
+        if(audioState === AUDIO_CONFIGURED || audioState === AUDIO_SETUP_ERROR)
             this.audio.disconnectAudio();
     }
   
