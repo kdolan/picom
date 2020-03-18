@@ -4,7 +4,7 @@ const { exec } = require("child_process");
 
 const MIN = 0;
 const MAX = 37;
-const STEP = Math.round((100/MAX))*2;
+const STEP = Math.round((100/MAX)).toFixed(0);
 
 class VolumeService{
     /**
@@ -38,7 +38,7 @@ class VolumeService{
     }
 
     async decreaseVolume(){
-        const result = await _setVolume(this.status.left + STEP);
+        const result = await _setVolume(this.status.left - STEP);
         this._audioChanged(result);    }
 
     async mute(){
