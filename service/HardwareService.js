@@ -101,27 +101,27 @@ class HardwareService extends EventEmitter{
     }
 
     _setupTxButton(){
-        this._setupButton({pin: this.hardwareConfig.txButtonPin, eventName: BASE_EVENTS.txEvent});
+        this._setupButton({pin: this.hardwareConfig.txButtonPin, eventName: HARDWARE_EVENTS.txEvent});
     }
 
     _setupCallButton(){
-        this._setupButton({pin: this.hardwareConfig.callButtonPin, eventName: BASE_EVENTS.callEvent});
+        this._setupButton({pin: this.hardwareConfig.callButtonPin, eventName: HARDWARE_EVENTS.callEvent});
     }
 
     _setupVolMuteButton(){
-        this._setupButton({pin: this.hardwareConfig.volMutePin, eventName: BASE_EVENTS.volMuteEvent});
+        this._setupButton({pin: this.hardwareConfig.volMutePin, eventName: HARDWARE_EVENTS.volMuteEvent});
     }
 
     _setupVolNominalButton(){
-        this._setupButton({pin: this.hardwareConfig.volNominalPin, eventName: BASE_EVENTS.volNominalEvent});
+        this._setupButton({pin: this.hardwareConfig.volNominalPin, eventName: HARDWARE_EVENTS.volNominalEvent});
     }
 
     _setupVolIncreaseButton(){
-        this._setupButton({pin: this.hardwareConfig.volIncreasePin, eventName: BASE_EVENTS.volIncreaseEvent});
+        this._setupButton({pin: this.hardwareConfig.volIncreasePin, eventName: HARDWARE_EVENTS.volIncreaseEvent});
     }
 
     _setupVolDecreaseButton(){
-        this._setupButton({pin: this.hardwareConfig.volDecreasePin, eventName: BASE_EVENTS.volDecreaseEvent});
+        this._setupButton({pin: this.hardwareConfig.volDecreasePin, eventName: HARDWARE_EVENTS.volDecreaseEvent});
     }
 
     _setupCallLed(){
