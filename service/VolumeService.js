@@ -101,7 +101,7 @@ function _processSetVolumeOutput(output) {
         //TODO parse min/max from output
         const [leftVol, rightVol] = matches[1].split(',').map(v => Number(v));
         log.info(`Volume Set to: Left: ${leftVol}/${MAX}, Right: ${rightVol}/${MAX}`);
-        return {NumberleftVol, rightVol};
+        return {leftVol, rightVol};
     }
 }
 
