@@ -2,6 +2,7 @@
   "server": "mumble.example.net",
   "port": "36001",
   "username": "NodeJs",
+  "defaultChannelName": null,
   "keyPath": "./cert/key.pem",
   "certPath": "./cert/cert.pem"
 }

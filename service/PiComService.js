@@ -1,18 +1,26 @@
-const {HardwareService} = require("./HardwareService");
+const {HardwareService, HARDWARE_EVENTS} = require("./HardwareService");
 const {MumbleClientWrapper} = require("./MumbleClientWrapper");
-const Speaker = require('./Speaker');
-const Mic = require('mic');
 const log = require('loglevel');
+const {AudioService} = require("./AudioService");
 const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
 
 const UP = "UP";
 const DOWN = "DOWN";
 const LATCH_TIME_MS=500;
 
+const {AUDIO, STATUS} = require('../domain/status.constants');
+const {STATUS_NORMAL, STATUS_WARN, STATUS_ERROR} = {...STATUS};
+const {AUDIO_NOT_SETUP, AUDIO_SETUP_ERROR, AUDIO_CONFIGURED} = {...AUDIO};
+
+
 class PiComService{
     constructor({mumbleConfig, hardwareConfig}) {
         this.mumble = new MumbleClientWrapper(mumbleConfig);
         this.hardware = new HardwareService(hardwareConfig);
+        this.audio = new AudioService({piCom: this});
+
+        this.mumbleConfig = mumbleConfig;
+        this.hardwareConfig = hardwareConfig;
 
         this.state = {
             calling: false,
@@ -22,20 +30,96 @@ class PiComService{
 
         this._txTimes = [];
         this._stopTxTimes = [];
+
+        this._healthCheckInterval = setInterval(() => this._healthCheckCallback(), 1000);
+    }
+
+    get status(){
+        return {
+            piCom: this.state,
+            mumble: this.mumble.status,
+            hardware: this.hardware.status,
+            audio: this.audio.status,
+            global: this._errorState
+        }
+    }
+
+    get _errorState(){
+        const messages = [];
+        const audioState = this.audio.status.state;
+        if(audioState === AUDIO_NOT_SETUP)
+            messages.push({message: `${STATUS_WARN} - Audio Not Setup`, status: STATUS_WARN});
+        if(audioState === AUDIO_SETUP_ERROR)
+            messages.push({message: `${STATUS_ERROR} - Audio Error`, status: STATUS_ERROR});
+
+        if(!this.hardware.status.setupDone)
+            messages.push({message: `${STATUS_WARN} - Hardware Not Setup`, status: STATUS_WARN});
+
+        if(!this.mumble.status.connected) {
+            if(this.mumble.status.connectionAttempted)
+                messages.push({message: `${STATUS_ERROR} - Mumble Not Connected`, status: STATUS_ERROR});
+            else
+                messages.push({message: `${STATUS_WARN} - Mumble Connection Not Attempted`, status: STATUS_WARN});
+        }
+
+        let warnLevel = messages.filter(m => m.status === STATUS_WARN).length > 0;
+        let errorLevel = messages.filter(m => m.status === STATUS_ERROR).length > 0;
+        if(errorLevel)
+            return {status: STATUS_ERROR, messages};
+        if(warnLevel)
+            return {status: STATUS_WARN, messages};
+        return {status: STATUS_NORMAL, messages};
+
+    }
+
+    async reconfigureMumbleAndReconnect(newConfig){
+        this.mumbleConfig = newConfig;
+        await this._disconnectMumble();
+        this.mumble = new MumbleClientWrapper(newConfig);
+        await this._connectMumble();
     }
 
     async setup(){
-       let clientConnectionPromise = this.mumble.connect();
-       this.hardware.setup();
-       //Wait for mumble client to be ready
-       await clientConnectionPromise;
+        this.hardware.setup();
+        await this._connectMumble();
+        this._bindHardwareEvents();
+    }
 
-       if(process.env.DEBUG_DISABLE_AUDIO_HARDWARE !== "TRUE")
-            this._setupAudio();
-       else
-           log.warn(`Hardware Audio Disabled. DEBUG_DISABLE_AUDIO_HARDWARE is set`);
+    async _connectMumble(){
+        try {
+            await this.mumble.connect();
+        }
+        catch (err) {
+            log.error('PiCom Mumble Connection - Mumble was not able to connect. Check configuration and try again', err);
+            return;
+            //Swallow Error
+        }
 
-       this._bindHardwareEvents();
+        //Audio always needs to be configured after the mumble client is connected
+        this.audio.setupAudio();
+        //If Default Channel Set Join it
+        if(this.mumbleConfig.defaultChannelName) {
+            try {
+                await this.mumble.joinChannel(this.mumbleConfig.defaultChannelName);
+            }
+            catch (err) {
+                if(err.code === 404)
+                    log.warn(`The Default Channel '${this.mumbleConfig.defaultChannelName}' does not exist. Client will stay in root channel`);
+                else {
+                    log.error(`Error Joining Default Channel. Client will stay in root channel`);
+                    //Swallowing Error
+                }
+            }
+        }
+    }
+
+    async _disconnectMumble(){
+        if(this.mumble.status.connected)
+            await this.mumble.disconnect();
+
+        const audioState = this.audio.status.state;
+        if(audioState === AUDIO_CONFIGURED || audioState === AUDIO_SETUP_ERROR)
+            this.audio.disconnectAudio();
     }
   
     unLatchMic(){
@@ -49,80 +133,28 @@ class PiComService{
             throw new ErrorWithStatusCode({code: 400, message});
         }
     }
-    _setupAudio(){
-        try {
-            this._setupMic();
-
-            this.speaker = new Speaker({
-                channels: 1,
-                bitDepth: 16,
-                device: "plughw:1,0"
-            });
-
-            const outputStream = this.mumble.connection.outputStream(undefined, true);
-            outputStream.pipe(this.speaker);
-        }
-        catch (e) {
-            if(process.env.DEBUG_IGNORE_AUDIO_ERRORS === "TRUE"){
-                log.warn(`Audio Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`);
-                return;
-            }
-            log.error(`Audio Setup Failed. Error`, e);
-            throw e;
-        }
-    }
-
-    _setupMic(){
-        try {
-            this.mic = Mic({
-                rate: '88000',
-                channels: '1',
-                debug: true,
-                device: "hw:CARD=Device,DEV=0",
-                exitOnSilence: 0
-            });
-
-            const micInputStream = this.mic.getAudioStream();
-            let mumbleWriteStream = this.mumble.connection.inputStream();
-            micInputStream.pipe(mumbleWriteStream);
-
-            micInputStream.on('data', function (data) {
-                log.debug("Mic Input Stream Data: " + data.length);
-            });
-
-            micInputStream.on('error', function (err) {
-                log.error("Error in Mic Input Stream: " + err);
-            });
-
-            micInputStream.on('processExitComplete', function () {
-                log.warn("Got SIGNAL processExitComplete");
-            });
-
-            //Start the mic stream but pause it immediately since it is not transmitting
-            this.mic.start();
-            this.mic.pause();
-        }
-        catch (e) {
-            if(process.env.DEBUG_IGNORE_AUDIO_ERRORS === "TRUE"){
-                log.warn(`Mic Setup Failed. Warning - DEBUG_IGNORE_AUDIO_ERRORS is SET`);
-                return;
-            }
-            log.error(`Mic Setup Failed. Error`, e);
-            throw e;
-        }
-    }
 
     _bindHardwareEvents(){
-        this.hardware.on('txButton-down', () => this._txEvent(DOWN));
-        this.hardware.on('txButton-up', () => this._txEvent(UP));
+        this.hardware.on(`${HARDWARE_EVENTS.txEvent}-down`, () => this._txEvent(DOWN));
+        this.hardware.on(`${HARDWARE_EVENTS.txEvent}-up`, () => this._txEvent(UP));
 
-        this.hardware.on('callButton-down', () => this._callEvent(DOWN));
-        this.hardware.on('callButton-up', () => this._callEvent(UP));
+        this.hardware.on(`${HARDWARE_EVENTS.callEvent}-down`, () => this._callEvent(DOWN));
+        this.hardware.on(`${HARDWARE_EVENTS.callEvent}-up`, () => this._callEvent(UP));
+
+        this._bindVolumeEvent(HARDWARE_EVENTS.volMuteEvent);
+        this._bindVolumeEvent(HARDWARE_EVENTS.volNominalEvent);
+        this._bindVolumeEvent(HARDWARE_EVENTS.volIncreaseEvent);
+        this._bindVolumeEvent(HARDWARE_EVENTS.volDecreaseEvent);
+    }
+
+    _bindVolumeEvent(event){
+        this.hardware.on(`${event}-down`, () => this._volumeEvent({state: DOWN, event}));
+        this.hardware.on(`${event}-up`, () => this._volumeEvent({state: UP, event}));
     }
 
     _txEvent(state){
         if(state === DOWN) {
-            this.mic.resume();
+            this.audio.mic.resume();
             this._txTimes.unshift(new Date());
             this._txTimes = this._txTimes.slice(0,2);
 
@@ -136,7 +168,7 @@ class PiComService{
             this.state.micLatch = false;
             this._latchLogic(); //Determines if the mic should be latched by setting state.micLatch
             if(!this.state.micLatch) {
-                this.mic.pause();
+                this.audio.mic.pause();
                 this.state.transmitting = false;
                 this.hardware.setTalkLed(false);
             }
@@ -147,6 +179,29 @@ class PiComService{
         this.state.calling = state === DOWN;
         this.hardware.setCallLed(state === DOWN);
         this.mumble.sendMessageToCurrentChannel(state === DOWN ? "CALLING" : "END CALLING");
+    }
+
+    _volumeEvent({state, event}){
+        const MESSAGE = `Volume Hardware Event Processing Error:`;
+        if(state === UP)
+            return; //Nothing to do on DOWN
+
+        switch (event) {
+            case HARDWARE_EVENTS.volMuteEvent:
+                this.audio.volume.mute().catch(e => log.error(MESSAGE + e));
+                break;
+            case HARDWARE_EVENTS.volNominalEvent:
+                this.audio.volume.setNominalVolume().catch(e => log.error(MESSAGE + e));
+                break;
+            case HARDWARE_EVENTS.volIncreaseEvent:
+                this.audio.volume.increaseVolume().catch(e => log.error(MESSAGE + e));
+                break;
+            case HARDWARE_EVENTS.volDecreaseEvent:
+                this.audio.volume.decreaseVolume().catch(e => log.error(MESSAGE + e));
+                break;
+            default:
+                throw new ErrorWithStatusCode({code: 500, message: `Invalid volume event '${event}'`});
+        }
     }
 
     _latchLogic(){
@@ -165,6 +220,11 @@ class PiComService{
                 log.debug(`Not Latching: First Hold ${firstHoldDuration}, Second Hold: ${secondHoldDuration}, Tx Interval: ${timeBetweenTxEvents}`);
         }
         this.state.micLatch = false;
+    }
+
+    _healthCheckCallback(){
+        const status = this.status;
+        this.hardware.setErrorFlasher(status.global.status === STATUS_ERROR);
     }
 }
 
