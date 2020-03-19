@@ -43,6 +43,11 @@ class HardwareService extends EventEmitter{
         this._setupTxButton();
         this._setupCallButton();
 
+        this._setupVolMuteButton();
+        this._setupVolNominalButton();
+        this._setupVolIncreaseButton();
+        this._setupVolDecreaseButton();
+
         this._setupDone = true;
     }
 
