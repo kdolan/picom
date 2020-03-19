@@ -4,19 +4,24 @@ const EventEmitter = require('events');
 
 const GLITCH_FILTER=1000;
 
+const HARDWARE_EVENTS = {
+    txEvent: "txButton",
+    callEvent: "callButton",
+    volMuteEvent: "volMuteButton",
+    volNominalEvent: "volNominalButton",
+    volIncreaseEvent: "volIncreaseButton",
+    volDecreaseEvent: "volDecreaseButton"
+};
+
 class HardwareService extends EventEmitter{
-    constructor({callButtonPin, txButtonPin, callLedPin, talkLedPin}){
+    constructor(hardwareConfig){
         super();
 
-        this.callButtonPin = callButtonPin;
-        this.txButtonPin = txButtonPin;
-        this.callLedPin = callLedPin;
-        this.talkLedPin = talkLedPin;
+        this.hardwareConfig = hardwareConfig;
 
         this._setupDone = false;
         this._errorFlasherEnabled = false;
         this._errorFlasherInterval = null;
-
 
         this._leds = {
             callLedOn: false,
@@ -34,8 +39,10 @@ class HardwareService extends EventEmitter{
     setup(){
         this._setupCallLed();
         this._setupTalkLed();
+
         this._setupTxButton();
         this._setupCallButton();
+
         this._setupDone = true;
     }
 
@@ -94,25 +101,41 @@ class HardwareService extends EventEmitter{
     }
 
     _setupTxButton(){
-        this._setupButton({pin: this.txButtonPin, eventName: 'txButton'});
+        this._setupButton({pin: this.hardwareConfig.txButtonPin, eventName: BASE_EVENTS.txEvent});
     }
 
     _setupCallButton(){
-        this._setupButton({pin: this.callButtonPin, eventName: 'callButton'});
+        this._setupButton({pin: this.hardwareConfig.callButtonPin, eventName: BASE_EVENTS.callEvent});
+    }
+
+    _setupVolMuteButton(){
+        this._setupButton({pin: this.hardwareConfig.volMutePin, eventName: BASE_EVENTS.volMuteEvent});
+    }
+
+    _setupVolNominalButton(){
+        this._setupButton({pin: this.hardwareConfig.volNominalPin, eventName: BASE_EVENTS.volNominalEvent});
+    }
+
+    _setupVolIncreaseButton(){
+        this._setupButton({pin: this.hardwareConfig.volIncreasePin, eventName: BASE_EVENTS.volIncreaseEvent});
+    }
+
+    _setupVolDecreaseButton(){
+        this._setupButton({pin: this.hardwareConfig.volDecreasePin, eventName: BASE_EVENTS.volDecreaseEvent});
     }
 
     _setupCallLed(){
-        this.callLed = new Gpio(this.callLedPin, {mode: Gpio.OUTPUT});
+        this.callLed = new Gpio(this.hardwareConfig.callLedPin, {mode: Gpio.OUTPUT});
         this.callLed.digitalWrite(0);
 
-        log.debug('Call LED setup on ' + this.callLedPin);
+        log.debug('Call LED setup on ' + this.hardwareConfig.callLedPin);
     }
 
     _setupTalkLed(){
-        this.talkLed = new Gpio(this.talkLedPin, {mode: Gpio.OUTPUT});
+        this.talkLed = new Gpio(this.hardwareConfig.talkLedPin, {mode: Gpio.OUTPUT});
         this.talkLed.digitalWrite(0);
 
-        log.debug('Talk LED setup on ' + this.talkLedPin);
+        log.debug('Talk LED setup on ' + this.hardwareConfig.talkLedPin);
     }
 
     _errorFlasherCallback(){
@@ -127,4 +150,4 @@ class HardwareService extends EventEmitter{
     }
 }
 
-module.exports.HardwareService = HardwareService;
+module.exports = {HardwareService, HARDWARE_EVENTS};

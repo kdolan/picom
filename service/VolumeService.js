@@ -21,8 +21,8 @@ class VolumeService{
     get status(){
         if(this.rawRightVol === null)
             return {
-                left: null,
-                right: null
+                leftPercent: null,
+                rightPercent: null
             };
 
         return {

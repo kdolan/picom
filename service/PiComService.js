@@ -1,4 +1,4 @@
-const {HardwareService} = require("./HardwareService");
+const {HardwareService, HARDWARE_EVENTS} = require("./HardwareService");
 const {MumbleClientWrapper} = require("./MumbleClientWrapper");
 const log = require('loglevel');
 const {AudioService} = require("./AudioService");
@@ -135,11 +135,21 @@ class PiComService{
     }
 
     _bindHardwareEvents(){
-        this.hardware.on('txButton-down', () => this._txEvent(DOWN));
-        this.hardware.on('txButton-up', () => this._txEvent(UP));
+        this.hardware.on(`${HARDWARE_EVENTS.txEvent}-down`, () => this._txEvent(DOWN));
+        this.hardware.on(`${HARDWARE_EVENTS.txEvent}-up`, () => this._txEvent(UP));
 
-        this.hardware.on('callButton-down', () => this._callEvent(DOWN));
-        this.hardware.on('callButton-up', () => this._callEvent(UP));
+        this.hardware.on(`${HARDWARE_EVENTS.callEvent}-down`, () => this._callEvent(DOWN));
+        this.hardware.on(`${HARDWARE_EVENTS.callEvent}-up`, () => this._callEvent(UP));
+
+        this._bindVolumeEvent(HARDWARE_EVENTS.volMuteEvent);
+        this._bindVolumeEvent(HARDWARE_EVENTS.volNominalEvent);
+        this._bindVolumeEvent(HARDWARE_EVENTS.volIncreaseEvent);
+        this._bindVolumeEvent(HARDWARE_EVENTS.volDecreaseEvent);
+    }
+
+    _bindVolumeEvent(event){
+        this.hardware.on(`${event}-down`, () => this._volumeEvent({state: DOWN, event}));
+        this.hardware.on(`${event}-up`, () => this._volumeEvent({state: UP, event}));
     }
 
     _txEvent(state){
@@ -169,6 +179,29 @@ class PiComService{
         this.state.calling = state === DOWN;
         this.hardware.setCallLed(state === DOWN);
         this.mumble.sendMessageToCurrentChannel(state === DOWN ? "CALLING" : "END CALLING");
+    }
+
+    _volumeEvent({state, event}){
+        const MESSAGE = `Volume Hardware Event Processing Error:`;
+        if(state === UP)
+            return; //Nothing to do on DOWN
+
+        switch (event) {
+            case HARDWARE_EVENTS.volMuteEvent:
+                this.audio.volume.mute().catch(e => log.error(MESSAGE + e));
+                break;
+            case HARDWARE_EVENTS.volNominalEvent:
+                this.audio.volume.setNominalVolume().catch(e => log.error(MESSAGE + e));
+                break;
+            case HARDWARE_EVENTS.volIncreaseEvent:
+                this.audio.volume.increaseVolume().catch(e => log.error(MESSAGE + e));
+                break;
+            case HARDWARE_EVENTS.volDecreaseEvent:
+                this.audio.volume.decreaseVolume().catch(e => log.error(MESSAGE + e));
+                break;
+            default:
+                throw new ErrorWithStatusCode({code: 500, message: `Invalid volume event '${event}'`});
+        }
     }
 
     _latchLogic(){
