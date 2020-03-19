@@ -69,15 +69,16 @@ async function _setVolume(rawValue){
 
 async function _execVolumePromise(command){
     return new Promise((resolve, reject) =>{
+        log.info(`Executing Volume Command: ${command}`);
         exec(command, (error, stdout, stderr) => {
             if (error) {
                 log.error(`Volume Command Error: ${error.message}`);
-                reject(new ErrorWithStatusCode({code: 500, message: "Unable to set volume", innerError: error}));
+                reject(new ErrorWithStatusCode({code: 500, message: "Unable to set volume - error", innerError: error}));
                 return;
             }
             if (stderr) {
                 log.error(`Volume Command Error: ${stderr}`);
-                reject(new ErrorWithStatusCode({code: 500, message: "Unable to set volume", innerError: stderr}));
+                reject(new ErrorWithStatusCode({code: 500, message: "Unable to set volume - stderr", innerError: stderr}));
                 return;
             }
             resolve(_processSetVolumeOutput(stdout));
