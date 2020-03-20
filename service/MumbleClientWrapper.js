@@ -1,6 +1,7 @@
 const mumble = require('mumble');
 const log = require('loglevel');
 const  EventEmitter = require('events');
+const {MumbleChanelInfo} = require("../domain/MumbleChannelInfo");
 const {ErrorWithStatusCode} = require("../obj/ErrorWithStatusCode");
 
 const RETRY_LIMIT=1000;
@@ -24,10 +25,14 @@ class MumbleClientWrapper extends EventEmitter{
     }
 
     get status(){
-        return {
+        const base = {
             connected: this._connected,
-            connectionAttempted: this._connectCalled
+            connectionAttempted: this._connectCalled,
+            currentChannel: null
         };
+        if(base.connected)
+            base.currentChannel = new MumbleChanelInfo(this.connection.user.channel);
+        return base;
     }
 
     async connect(){
@@ -75,12 +80,20 @@ class MumbleClientWrapper extends EventEmitter{
         this.connection.disconnect();
     }
 
-    async joinChannel(name){
+    async joinChannelByName(name){
+        return this._channelJoinerWithChannelFetchFunc(() => this.connection.channelByName(name), name);
+    }
+
+    async joinChannelById(id){
+        return this._channelJoinerWithChannelFetchFunc(() => this.connection.channelById(id), id);
+    }
+
+    async _channelJoinerWithChannelFetchFunc(channelFetchFn, argument){
         return new Promise((resolve, reject) => {
             try {
-                const channel = this.connection.channelByName(name);
+                const channel = channelFetchFn();
                 if (!channel) {
-                    log.error(`Error joining channel '${name}'. It does not exist`);
+                    log.error(`Error joining channel '${argument}'. It does not exist`);
                     reject(new ErrorWithStatusCode({message: "Channel does not exist", code: 404}));
                     return;
                 }

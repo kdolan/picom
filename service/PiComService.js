@@ -100,7 +100,7 @@ class PiComService{
         //If Default Channel Set Join it
         if(this.mumbleConfig.defaultChannelName) {
             try {
-                await this.mumble.joinChannel(this.mumbleConfig.defaultChannelName);
+                await this.mumble.joinChannelByName(this.mumbleConfig.defaultChannelName);
             }
             catch (err) {
                 if(err.code === 404)

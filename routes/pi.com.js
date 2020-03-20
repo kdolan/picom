@@ -10,6 +10,7 @@ module.exports = function() {
     router.post('/unlatch', controller.unlatchMicRoute);
 
     router.post('/mumble/configure', controller.reconfigureMumbleRoute);
+    router.post('/mumble/channel', controller.setMumbleChannelRoute);
 
     //TODO? - Maybe combine these to a single endpoint?
     router.post('/volume/mute', controller.muteVolumeRoute);

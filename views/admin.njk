@@ -36,6 +36,15 @@
                 </div>
                 <button type="button" class="btn btn-primary" onclick="save()">Save and Reconnect</button>
             </form>
+            <h1>Channel Admin</h1>
+            {% for channel in channels %}
+            <li>
+                <button type="button" class="btn btn-link" onclick="changeChannel({{channel.id}})">{{channel.path}}</button>
+                {% if channel.path == currentChannel.path  %} <span class="badge badge-success">Current Channel</span>{% endif %}
+            </li>
+            {% else %}
+            <li>No Channels Found</li>
+            {% endfor %}
             <h1>Volume Admin</h1>
             <form>
                 <button type="button" class="btn btn-outline-danger" onclick="volumeAction('mute')">Mute</button>
@@ -61,6 +70,22 @@
             },
             success: function(result) {
                 alert("Reconfigured and mumble reconnected");
+            },
+            error: function (result) {
+                alert("Error - Check Log");
+            }
+        });
+    }
+
+    function changeChannel(id){
+        $.ajax({
+            url: '/v1/mumble/channel',
+            type: 'POST',
+            data: {
+                id: id,
+            },
+            success: function(result) {
+                location.reload();
             },
             error: function (result) {
                 alert("Error - Check Log");
