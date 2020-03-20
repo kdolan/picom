@@ -50,7 +50,7 @@ function main() {
    const client = new MumbleClientService(CONFIG);
    client.connect()
        .then(r => {
-           return client.joinChannel("Landing Channel");
+           return client.joinChannelByName("Landing Channel");
        })
        .then(r => {
            client.sendMessageToCurrentChannel("GPIO Client");

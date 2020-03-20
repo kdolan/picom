@@ -58,6 +58,19 @@ controller.reconfigureMumbleRoute = function (req, res) {
 
 };
 
+controller.setMumbleChannelRoute = function(req, res) {
+    const id = Number(req.body.id);
+    if(isNaN(id) || id < 0){
+        res.status(400).json({message: "Invalid id"});
+        return;
+    }
+
+    req.piCom.mumble.joinChannelById(id)
+        .then(done => {
+            res.json(getStatus(req));
+        }).catch(err => util.standardErrorResponse(err, res));
+}
+
 //VOLUME - TODO Move
 function audioNotSetupRes(req, res){ //TODO Middleware
     if(req.piCom.audio.status.state === AUDIO_NOT_SETUP) {
