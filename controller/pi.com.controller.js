@@ -69,7 +69,7 @@ controller.setMumbleChannelRoute = function(req, res) {
         .then(done => {
             res.json(getStatus(req));
         }).catch(err => util.standardErrorResponse(err, res));
-}
+};
 
 //VOLUME - TODO Move
 function audioNotSetupRes(req, res){ //TODO Middleware
