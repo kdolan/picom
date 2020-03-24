@@ -14,6 +14,8 @@
 4. run `./scripts/gen-cert.sh`
 5. Copy `.env.template` to `.env` and configure as desired
 6. run `npm start`
+## Other Requirements
+1. `sudo apt-get install usbmount` for USB Automount
 
 ## Troubleshooting
 ### Error: Could not locate the bindings file
