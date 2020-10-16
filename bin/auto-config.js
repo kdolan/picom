@@ -7,10 +7,14 @@ try {
     if (fs.existsSync(AUTO_CONFIG_PATH)) {
         const data = require(AUTO_CONFIG_PATH);
         const wifiConfig = getWiFiConfig(data);
-        if(wifiConfig)
-            fs.writeFileSync(WIFI_CONFIG_PATH,wifiConfig,{encoding:'utf8',flag:'w'});
-        if(data.mumble)
-            fs.writeFileSync(MUMBLE_CONFIG_PATH,JSON.stringify(data.mumble, null, 2),{encoding:'utf8',flag:'w'});
+        if(wifiConfig) {
+            console.log(`Writing WIFI config to ${WIFI_CONFIG_PATH}`);
+            fs.writeFileSync(WIFI_CONFIG_PATH, wifiConfig, {encoding: 'utf8', flag: 'w'});
+        }
+        if(data.mumble) {
+            console.log(`Writing Mumble config to ${AUTO_CONFIG_PATH}`);
+            fs.writeFileSync(MUMBLE_CONFIG_PATH, JSON.stringify(data.mumble, null, 2), {encoding: 'utf8', flag: 'w'});
+        }
     }
 } catch(err) {
     console.error(err)
