@@ -4,10 +4,10 @@ const HARDWARE_CONFIG = {
 
     volIncreasePin: 24,
     volDecreasePin: 23,
-    volMutePin: 18,
+    volMutePin: 18, //Conflict with HAT
     volNominalPin: 25,
 
-    callLedPin: 19,
+    callLedPin: 19, //Conflict with HAT
     talkLedPin: 26
 };
 

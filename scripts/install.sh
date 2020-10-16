@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
+BRANCH=$1
+
+if [ -n "$BRANCH" ]; then
+  echo "BRANCH OVERRIDE: ${BRANCH}"
+else
+    BRANCH=master
+fi
+
+echo "Removing Existing Install..."
 rm -Rf /etc/picom
-mkdir /etc/picom
-
-cd /etc/picom
-
-git archive --remote="https://github.com/kdolan/effective-winner-mumble" | tar -t
+cd /etc/
+echo "Downloading..."
+echo "clone https://github.com/kdolan/picom -b ${BRANCH}"
+git clone https://github.com/kdolan/picom -b ${BRANCH}
+cd picom
+rm -Rf .git
