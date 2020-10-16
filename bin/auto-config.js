@@ -1,5 +1,5 @@
 const fs = require('fs');
-const AUTO_CONFIG_PATH = '/media/usb/picom.usb.auto.config.json';
+const AUTO_CONFIG_PATH = '/mnt/picom.usb.auto.config.json';
 const WIFI_CONFIG_PATH = '/etc/wpa_supplicant/wpa_supplicant.conf';
 const MUMBLE_CONFIG_PATH = '/etc/picom/config/mumble/auto.json';
 
