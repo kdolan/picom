@@ -19,4 +19,4 @@ rm -Rf .git
 #Sim Link for Startup File
 echo "Createing symlink for auto config..."
 rm /etc/init.d/picom.auto.config.sh
-ln -s /etc/picom/scripts/picom.auto.config.sh /etc/init.d/
+ln -s /etc/picom/scripts/picom.auto.config.sh /etc/init.d/picom.auto.config.sh
