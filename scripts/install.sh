@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
+BRANCH=$1
+if BRANCH; then
+  echo "Using $BRANCH"
+else
+    BRANCH=master
+fi
+
 echo "Removing Existing Install..."
 rm -Rf /etc/picom
 cd /etc/
 echo "Downloading..."
-git clone https://github.com/kdolan/picom
+git clone https://github.com/kdolan/picom -b ${BRANCH}
 cd picom
 rm -Rf .git
 
