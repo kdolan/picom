@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 rm -Rf /etc/picom
-mkdir /etc/picom
-
-cd /etc/picom
-
-git archive --remote="https://github.com/kdolan/effective-winner-mumble" | tar -t
+cd /etc/
+git clone https://github.com/kdolan/picom
+cd picom
+rm -Rf .git
