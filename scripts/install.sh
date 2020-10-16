@@ -2,7 +2,7 @@
 BRANCH=$1
 echo ${BRANCH}
 
-if expr length ${BRANCH} > 0; then
+if [ -n "$BRANCH" ]; then
   echo "BRANCH OVERRIDE: ${BRANCH}"
 else
     BRANCH=master
