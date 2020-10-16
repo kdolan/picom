@@ -3,6 +3,7 @@ const AUTO_CONFIG_PATH = '/media/usb/picom.usb.auto.config.json';
 const WIFI_CONFIG_PATH = '/etc/wpa_supplicant/wpa_supplicant.conf';
 const MUMBLE_CONFIG_PATH = '/etc/picom/config/mumble/auto.json';
 
+console.log(`picom Automatic config utility is running...`);
 try {
     if (fs.existsSync(AUTO_CONFIG_PATH)) {
         const data = require(AUTO_CONFIG_PATH);
