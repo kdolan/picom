@@ -1,0 +1,13 @@
+{
+    "wifi": {
+        "wifiName": null,
+        "wifiPassword": null
+    },
+    "mumble": {
+      "server": "mumble.*.dev",
+      "port": "64738",
+      "username": "NodeJs1-AutoConfig",
+      "keyPath": null,
+      "certPath": null
+    }
+}
