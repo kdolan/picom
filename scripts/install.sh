@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 BRANCH=$1
-echo ${BRANCH}
 
 if [ -n "$BRANCH" ]; then
   echo "BRANCH OVERRIDE: ${BRANCH}"
