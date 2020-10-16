@@ -16,6 +16,7 @@
 6. run `npm start`
 ## Other Requirements
 1. `sudo apt-get install usbmount` for USB Automount
+2. For auto config to work add line to end of `/etc/rc.local`
 
 ## Troubleshooting
 ### Error: Could not locate the bindings file
