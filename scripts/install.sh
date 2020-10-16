@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 BRANCH=$1
-if BRANCH; then
-  echo "BRANCH OVERRIDE: $BRANCH"
+echo ${BRANCH}
+
+if ${BRANCH}; then
+  echo "BRANCH OVERRIDE: ${BRANCH}"
 else
     BRANCH=master
 fi
-echo "Using branch $BRANCH"
 
 echo "Removing Existing Install..."
 rm -Rf /etc/picom
