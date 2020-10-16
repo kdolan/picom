@@ -12,6 +12,7 @@ echo "Removing Existing Install..."
 rm -Rf /etc/picom
 cd /etc/
 echo "Downloading..."
+echo "clone https://github.com/kdolan/picom -b ${BRANCH}"
 git clone https://github.com/kdolan/picom -b ${BRANCH}
 cd picom
 rm -Rf .git
