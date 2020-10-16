@@ -16,6 +16,8 @@ try {
             fs.writeFileSync(MUMBLE_CONFIG_PATH, JSON.stringify(data.mumble, null, 2), {encoding: 'utf8', flag: 'w'});
         }
     }
+    else
+        console.log(`Cannot find ${AUTO_CONFIG_PATH}. No config written`);
 } catch(err) {
     console.error(err)
 }
