@@ -13,7 +13,7 @@ try {
             fs.writeFileSync(WIFI_CONFIG_PATH, wifiConfig, {encoding: 'utf8', flag: 'w'});
         }
         if(data.mumble) {
-            console.log(`Writing Mumble config to ${AUTO_CONFIG_PATH}`);
+            console.log(`Writing Mumble config to ${MUMBLE_CONFIG_PATH}`);
             fs.writeFileSync(MUMBLE_CONFIG_PATH, JSON.stringify(data.mumble, null, 2), {encoding: 'utf8', flag: 'w'});
         }
     }
